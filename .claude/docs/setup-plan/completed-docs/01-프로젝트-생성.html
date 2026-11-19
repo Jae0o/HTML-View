@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>01 프로젝트 생성 완료</title>
+<style>
+  :root{
+    --blue-50:#EFF6FF; --blue-500:#3182F6; --blue-600:#1B64DA; --blue-700:#1957C2;
+    --gray-900:#191F28; --gray-800:#333D4B; --gray-700:#4E5968; --gray-600:#6B7684;
+    --gray-500:#8B95A1; --gray-400:#B0B8C1; --gray-300:#D1D6DB; --gray-200:#E5E8EB;
+    --gray-100:#F2F4F6; --gray-50:#F9FAFB; --white:#FFFFFF;
+    --green-bg:#E7F9EF; --green-700:#15803D;
+    --amber-500:#F79009; --amber-bg:#FEF3E2; --amber-700:#B54708;
+    --red-bg:#FDECEE; --red-700:#C4303B;
+    --line:var(--gray-200); --line-strong:var(--gray-300);
+    --r-card:20px; --r-box:12px; --r-pill:999px;
+    --shadow-sm:0 1px 3px rgba(0,0,0,.06);
+    --sans:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;
+    --mono:"SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--white);color:var(--gray-900);font-family:var(--sans);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased;margin:0;}
+  .wrap{max-width:1040px;margin:0 auto;padding:48px 24px 120px;}
+  a{color:var(--blue-600);}
+  .doc-head{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:32px;}
+  .kicker{color:var(--blue-500);font-weight:700;font-size:13px;letter-spacing:.08em;}
+  h1{font-size:30px;font-weight:800;letter-spacing:-.02em;margin:10px 0 12px;line-height:1.25;}
+  .lead{color:var(--gray-600);font-size:16px;max-width:72ch;margin:0;}
+  .pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
+  .pill{font-size:13px;padding:6px 12px;border-radius:var(--r-pill);background:var(--gray-100);color:var(--gray-700);}
+  .road{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:18px;font-size:14px;}
+  .road a{border:1px solid var(--line);border-radius:var(--r-pill);padding:6px 14px;background:var(--gray-50);color:var(--gray-800);text-decoration:none;}
+  .road a:hover{border-color:var(--blue-500);color:var(--blue-600);}
+  .road .ar{color:var(--gray-400);}
+  h2{font-size:21px;font-weight:700;margin:48px 0 8px;display:flex;align-items:center;gap:12px;letter-spacing:-.01em;}
+  h2 .n{width:28px;height:28px;border-radius:9px;background:var(--blue-500);color:#fff;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .lead2{color:var(--gray-600);font-size:14.5px;margin:2px 0 18px;}
+  p{margin:10px 0;color:var(--gray-800);}
+  code{font-family:var(--mono);font-size:.86em;background:var(--gray-100);padding:1px 6px;border-radius:6px;color:var(--gray-800);}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:var(--r-card);padding:22px 24px;margin:18px 0;box-shadow:var(--shadow-sm);}
+  .card.tight{padding:14px 18px;}
+  .callout{border-radius:var(--r-box);padding:16px 18px;margin:16px 0;border:1px solid var(--line);}
+  .callout .ct{font-weight:700;margin-bottom:4px;}
+  .callout.info{background:var(--blue-50);border-color:#CFE3FF;} .callout.info .ct{color:var(--blue-700);}
+  .callout.warn{background:var(--amber-bg);border-color:#FBDCA6;} .callout.warn .ct{color:var(--amber-700);}
+  .tag{display:inline-flex;align-items:center;font-size:12px;font-weight:700;padding:3px 10px;border-radius:var(--r-pill);white-space:nowrap;}
+  .tag.ok{color:var(--green-700);background:var(--green-bg);}
+  .tag.warn{color:var(--amber-700);background:var(--amber-bg);}
+  .tag.info{color:var(--blue-700);background:var(--blue-50);}
+  .tag.mut{color:var(--gray-600);background:var(--gray-100);}
+  .tag.bad{color:var(--red-700);background:var(--red-bg);}
+  .tbl{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{font-size:12px;font-weight:700;color:var(--gray-500);background:var(--gray-50);letter-spacing:.03em;}
+  tr:last-child td{border-bottom:none;}
+  table.legend{font-size:13px;margin:4px 0 6px;} table.legend td{padding:6px 10px;border:none;}
+  .flow{display:flex;flex-direction:column;margin:16px 0;}
+  .step{display:flex;gap:16px;position:relative;padding-bottom:20px;}
+  .step:not(:last-child)::before{content:"";position:absolute;left:17px;top:36px;bottom:0;width:2px;background:var(--line);}
+  .step .dot{width:36px;height:36px;border-radius:50%;background:var(--blue-50);color:var(--blue-600);border:2px solid var(--blue-500);display:flex;align-items:center;justify-content:center;font-weight:700;flex:0 0 auto;z-index:1;}
+  .step .body{padding-top:6px;color:var(--gray-700);}
+  .step .body b{color:var(--gray-900);}
+  /* 브라우저 목업 */
+  .browser{border:1px solid var(--line-strong);border-radius:16px;background:#fff;font-size:13px;margin:14px 0;}
+  .browser .tabs{display:flex;align-items:flex-end;gap:6px;padding:10px 14px 0;background:var(--gray-100);border-radius:16px 16px 0 0;}
+  .browser .tab{display:flex;align-items:center;gap:8px;background:#fff;border-radius:10px 10px 0 0;padding:8px 14px;font-weight:600;color:var(--gray-800);}
+  .browser .tab svg{width:16px;height:16px;flex:0 0 auto;}
+  .browser .addr{padding:8px 14px;border-bottom:1px solid var(--line);background:#fff;}
+  .browser .addr span{display:block;background:var(--gray-100);border-radius:var(--r-pill);padding:5px 14px;color:var(--gray-500);font-family:var(--mono);font-size:12px;}
+  .browser .view{padding:18px 16px 60px;min-height:140px;}
+  .browser .view .plain{font-family:Times,serif;font-size:16px;color:#000;}
+  .rel{position:relative;justify-self:start;align-self:start;width:max-content;max-width:calc(100% - 22px);margin-right:22px;}
+  span.rel{display:inline-block;vertical-align:top;}
+  .pin{position:absolute;display:block;width:20px;height:20px;border-radius:50%;background:var(--amber-500);color:#fff;font:800 11px/20px var(--sans);text-align:center;text-decoration:none;box-shadow:0 0 0 2px #fff;z-index:2;}
+  #tip{position:fixed;z-index:1000;box-sizing:border-box;width:max-content;max-width:min(340px,calc(100vw - 16px));background:var(--gray-900);color:#fff;font-size:12px;font-weight:500;line-height:1.5;padding:7px 10px;border-radius:8px;white-space:pre-line;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.18);}
+  .pin:target{outline:3px solid var(--amber-500);outline-offset:3px;}
+  tr:target td{background:var(--amber-bg);}
+  table.anc td:first-child a{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--amber-bg);color:var(--amber-700);font-weight:800;font-size:12px;align-items:center;justify-content:center;text-decoration:none;}
+  table.anc td.val{font-size:13px;color:var(--gray-700);}
+  .tree{font-family:var(--mono);font-size:13px;line-height:1.85;color:var(--gray-600);white-space:pre;overflow:auto;background:var(--gray-50);border:1px solid var(--line);border-radius:var(--r-box);padding:16px 18px;}
+  .tree b{color:var(--blue-600);font-weight:600;} .tree i{color:var(--amber-700);font-style:normal;} .tree s{color:var(--gray-400);} .tree .c{color:var(--gray-400);}
+  .foot{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--gray-400);font-size:12.5px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="doc-head">
+    <div class="kicker">셋업 01 · 프로젝트 생성 완료</div>
+    <h1>빈 React 앱에 0Docs 이름과 로고를 달았고, 빌드 · 린트 확인을 모두 통과했어요</h1>
+    <p class="lead">Vite <code>react-ts</code> 템플릿으로 만든 앱에서 예시 화면을 비우고, 이름 · 탭 아이콘 · 경로 별칭을 달고, Zustand 를 설치했어요. 화면에 보이는 변화는 탭 제목과 아이콘, 본문의 글자 「0Docs」 세 가지예요.</p>
+    <div class="pills">
+      <span class="pill">기준: 플랜 01-프로젝트-생성 · 2026-11-19</span>
+      <span class="pill">커밋 전 상태 — main 에서 진행 (사용자 결정)</span>
+    </div>
+    <nav class="road"><a href="#s0">① 결론</a><span class="ar">→</span><a href="#s1">② 화면</a><span class="ar">→</span><a href="#s2">③ 만든 순서</a><span class="ar">→</span><a href="#s3">④ 파일</a><span class="ar">→</span><a href="#s4">⑤ 확인 결과</a><span class="ar">→</span><a href="#s5">⑥ 남은 확인</a></nav>
+  </header>
+
+  <h2 id="s0"><span class="n">0</span>01 태스크의 확인 항목 7개를 모두 통과했어요</h2>
+  <p class="note" style="font-size:13px;color:var(--gray-600)">뱃지 범례</p>
+  <table class="legend"><tr>
+    <td><span class="tag ok">통과</span> 직접 실행해 확인함</td>
+    <td><span class="tag warn">주의</span> 동작은 하지만 알아 둘 것</td>
+    <td><span class="tag mut">해당 없음</span> 이번 태스크 범위 밖</td>
+    <td><span class="tag info">눈으로</span> 사용자가 브라우저에서 볼 것</td>
+  </tr></table>
+  <div class="card tight"><div class="tbl">
+    <table>
+      <thead><tr><th style="width:34%">항목</th><th style="width:14%">판정</th><th>메모</th></tr></thead>
+      <tbody>
+        <tr><td>build (타입 검사 포함)</td><td><span class="tag ok">통과</span></td><td>오류 없이 결과물이 만들어졌어요</td></tr>
+        <tr><td>lint</td><td><span class="tag ok">통과</span></td><td>템플릿 기본 린터, 경고 0</td></tr>
+        <tr><td>경로 별칭 <code>@/</code></td><td><span class="tag ok">통과</span></td><td>타입 검사 · 빌드 · 개발 서버 세 곳 모두에서 확인 후 임시 파일 삭제</td></tr>
+        <tr><td>Node 버전</td><td><span class="tag warn">주의</span></td><td>지금 PC 는 Node 20.20. 앱 요구 버전(22.12 이상)보다 낮아 설치할 때 경고가 떠요. 빌드는 됩니다</td></tr>
+        <tr><td>Vitest · Prettier</td><td><span class="tag mut">해당 없음</span></td><td>템플릿에 없음. Prettier 는 03 태스크에서 넣어요</td></tr>
+      </tbody>
+    </table>
+  </div></div>
+
+  <h2 id="s1"><span class="n">1</span>화면에서 바뀐 곳은 탭 제목 · 탭 아이콘 · 본문 글자 세 곳이에요</h2>
+  <div class="lead2">번호에 마우스를 올리면 설명이 떠요. 스타일은 02 태스크에서 넣으므로 지금은 브라우저 기본 글꼴 그대로예요.</div>
+  <div class="browser">
+    <div class="tabs">
+      <div class="tab">
+        <span class="rel"><svg viewBox="0 0 24 24" aria-label="0Docs 로고"><defs><clipPath id="cf"><path d="M0 0H12.5V2L19.5 9V24H0z"/></clipPath></defs><path clip-path="url(#cf)" fill="#10b981" fill-rule="evenodd" d="M12.0 2a7.5 7.5 0 0 1 7.5 7.5v5a7.5 7.5 0 0 1 -15 0v-5a7.5 7.5 0 0 1 7.5 -7.5zM12.0 6.5a3.0 3.0 0 0 1 3.0 3.0v5a3.0 3.0 0 0 1 -6 0v-5a3.0 3.0 0 0 1 3.0 -3.0z"/><path fill="#047857" d="M12.5 2L19.5 9H13.5a1 1 0 0 1 -1 -1z"/></svg><a class="pin" id="p1" href="#r1" style="top:-10px;right:-24px" data-tip="탭 아이콘
+템플릿 Vite 아이콘을 지우고 0Docs 로고 마크(접힌 0)로">1</a></span>
+        <span class="rel">0Docs<a class="pin" id="p2" href="#r2" style="top:-10px;right:-24px" data-tip="탭 제목
+html-view-scaffold → 0Docs · 문서 언어도 한국어(ko)로">2</a></span>
+      </div>
+    </div>
+    <div class="addr"><span>localhost:5173</span></div>
+    <div class="view"><span class="rel plain">0Docs<a class="pin" id="p3" href="#r3" style="top:-10px;right:-24px" data-tip="본문
+템플릿 예시(로고 · 카운터 · 링크 모음)를 지우고 글자 「0Docs」 한 줄만">3</a></span></div>
+  </div>
+  <div class="tbl">
+    <table class="anc">
+      <thead><tr><th>#</th><th>UI 자리</th><th>무엇이 바뀌나</th><th>값 — 정체와 원문</th><th>상태</th></tr></thead>
+      <tbody>
+        <tr id="r1"><td><a href="#p1">1</a></td><td>브라우저 탭 아이콘</td><td>Vite 아이콘 대신 0Docs 로고가 보여요</td><td class="val">아이콘 파일 <code>favicon.svg</code> — 로고 확정 색 <code>#10b981</code> · <code>#047857</code></td><td><span class="tag ok">통과</span></td></tr>
+        <tr id="r2"><td><a href="#p2">2</a></td><td>브라우저 탭 제목</td><td>탭 이름이 0Docs 로, 문서 언어가 한국어로</td><td class="val">문서 제목 <code>0Docs</code> · 문서 언어 <code>ko</code></td><td><span class="tag ok">통과</span></td></tr>
+        <tr id="r3"><td><a href="#p3">3</a></td><td>본문</td><td>예시 화면이 사라지고 「0Docs」 글자만 남아요</td><td class="val">본문 글자 <code>0Docs</code> — <code>&lt;main&gt;</code> 한 개</td><td><span class="tag info">눈으로</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="s2"><span class="n">2</span>임시 폴더에서 만든 뒤 저장소로 옮기는 순서로 진행했어요</h2>
+  <div class="lead2">저장소에 <code>.claude/</code> 폴더가 있어 템플릿 생성기가 바로 만들지 못하므로, 플랜의 임시 폴더 방식을 썼어요.</div>
+  <div class="flow">
+    <div class="step"><div class="dot">1</div><div class="body"><b>템플릿 생성</b> — 옆 빈 폴더에 Vite <code>react-ts</code> 템플릿 생성 → 저장소로 복사(같은 이름 파일 없음) → 임시 폴더 삭제 → 이름 <code>html-view</code></div></div>
+    <div class="step"><div class="dot">2</div><div class="body"><b>설치</b> — 의존성 설치 + 상태 라이브러리 Zustand 설치 (스토어 파일은 아직 없음)</div></div>
+    <div class="step"><div class="dot">3</div><div class="body"><b>예시 정리</b> — 예시 이미지 · 아이콘 · 예시 CSS 삭제, 전역 CSS 비움, 본문을 「0Docs」 한 줄로</div></div>
+    <div class="step"><div class="dot">4</div><div class="body"><b>이름 · 아이콘</b> — 탭 제목 · 문서 언어 변경, 로고 마크 아이콘 추가</div></div>
+    <div class="step"><div class="dot">5</div><div class="body"><b>경로 별칭</b> — <code>@/</code> 를 <code>src/</code> 로. 값은 TypeScript 설정 한 곳에만 적고 Vite 가 그 값을 읽어요</div></div>
+    <div class="step"><div class="dot">6</div><div class="body"><b>Node 요구 버전</b> — 앱 정보에 Node 22.12 이상 명시 (배포 서버가 이 조건으로 빌드)</div></div>
+  </div>
+
+  <h2 id="s3"><span class="n">3</span>남은 파일은 템플릿 기본 설정과 화면 파일 3개뿐이에요</h2>
+  <div class="lead2"><b style="color:var(--blue-600)">파랑</b> = 템플릿에서 고친 파일 · <b style="color:var(--amber-700)">주황</b> = 새로 넣은 파일 · <s>회색 줄</s> = 지운 파일 · 나머지는 템플릿 그대로</div>
+<div class="tree"><b>index.html</b>            <span class="c">— 탭 제목 · 문서 언어</span>
+<b>package.json</b>          <span class="c">— 이름 · Node 요구 버전 · Zustand</span>
+package-lock.json     <span class="c">— npm 잠금 파일 (이것 하나뿐)</span>
+<b>tsconfig.app.json</b>     <span class="c">— 경로 별칭 값</span>
+<b>vite.config.ts</b>        <span class="c">— 별칭 값을 TypeScript 설정에서 읽기</span>
+tsconfig.json · tsconfig.node.json · .gitignore · .oxlintrc.json · README.md
+public/
+  <i>favicon.svg</i>         <span class="c">— 0Docs 로고 (템플릿 아이콘 교체)</span>
+  <s>icons.svg</s>
+src/
+  <b>App.tsx</b>             <span class="c">— 「0Docs」 한 줄</span>
+  main.tsx
+  <b>index.css</b>           <span class="c">— 비움 (02 에서 채움)</span>
+  <s>App.css</s>
+  <s>assets/ (hero.png · react.svg · vite.svg)</s></div>
+
+  <h2 id="s4"><span class="n">4</span>확인 항목은 모두 직접 실행했어요</h2>
+  <div class="tbl">
+    <table>
+      <thead><tr><th style="width:46%">확인 항목</th><th style="width:14%">결과</th><th>실행 결과</th></tr></thead>
+      <tbody>
+        <tr><td>탭 제목 · 문서 언어 검사가 각각 한 줄</td><td><span class="tag ok">통과</span></td><td>각각 1줄</td></tr>
+        <tr><td>로고 파일이 있고 로고 색 <code>#10b981</code> 포함</td><td><span class="tag ok">통과</span></td><td>1건</td></tr>
+        <tr><td>build 통과 (타입 검사 포함)</td><td><span class="tag ok">통과</span></td><td>오류 없음</td></tr>
+        <tr><td>lint 통과</td><td><span class="tag ok">통과</span></td><td>종료 코드 0</td></tr>
+        <tr><td>경로 별칭이 타입 검사 · 빌드 · 개발 서버에서 동작</td><td><span class="tag ok">통과</span></td><td>임시 파일로 확인 후 삭제. 5173 포트를 다른 프로젝트가 쓰고 있어 5199 포트로 개발 서버 확인</td></tr>
+        <tr><td>의존성에 Zustand 가 있음</td><td><span class="tag ok">통과</span></td><td>있음</td></tr>
+        <tr><td>잠금 파일이 npm 것 하나뿐</td><td><span class="tag ok">통과</span></td><td>하나뿐</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="s5"><span class="n">5</span>Node 버전과 화면 확인 두 가지가 남았어요</h2>
+  <div class="callout warn"><div class="ct">Node 20.20 → 22.12 이상 권장</div>앱에 「Node 22.12 이상」 을 적어 두었는데, 지금 PC 는 20.20 이에요. 설치할 때마다 버전 경고가 뜨지만 빌드 · 개발 서버는 동작해요. 배포 서버는 조건에 맞는 최신 버전으로 빌드하니 영향이 없어요. 로컬 Node 를 올릴지 정해 주세요.</div>
+  <div class="callout info"><div class="ct">사용자 확인 (눈으로)</div>개발 서버 화면에 「0Docs」 가 보이고, 탭 제목 · 탭 아이콘이 0Docs 로고인지 봐 주세요. 5173 포트를 다른 프로젝트 서버가 쓰고 있으면 다른 포트로 열려요.</div>
+
+  <div class="foot">기준 — 플랜 01-프로젝트-생성 · 실행 가이드 00 · 2026-11-19 · AI 기록 — 01-프로젝트-생성.ai.md</div>
+</div>
+
+<div id="tip" role="tooltip" hidden></div>
+<script>
+(() => {
+  const tip = document.getElementById('tip');
+  const show = (e) => {
+    const pin = e.target.closest('[data-tip]');
+    if (!pin) return;
+    tip.textContent = pin.dataset.tip;
+    tip.hidden = false;
+    tip.style.left = '0px'; tip.style.top = '0px';
+    const r = pin.getBoundingClientRect(), t = tip.getBoundingClientRect(), m = 8;
+    const x = Math.max(m, Math.min(r.left + r.width / 2 - t.width / 2, innerWidth - t.width - m));
+    const y = r.top - t.height - 8 >= m ? r.top - t.height - 8 : r.bottom + 8;
+    tip.style.left = x + 'px';
+    tip.style.top = y + 'px';
+  };
+  const hide = (e) => { if (e.target.closest('[data-tip]')) tip.hidden = true; };
+  document.addEventListener('mouseover', show);
+  document.addEventListener('mouseout', hide);
+  document.addEventListener('focusin', show);
+  document.addEventListener('focusout', hide);
+  addEventListener('scroll', () => { tip.hidden = true; }, true);
+})();
+</script>
+</body>
+</html>
