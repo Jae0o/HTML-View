@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>03 코드 정렬 완료</title>
+<style>
+  :root{
+    --blue-50:#EFF6FF; --blue-500:#3182F6; --blue-600:#1B64DA; --blue-700:#1957C2;
+    --gray-900:#191F28; --gray-800:#333D4B; --gray-700:#4E5968; --gray-600:#6B7684;
+    --gray-500:#8B95A1; --gray-400:#B0B8C1; --gray-300:#D1D6DB; --gray-200:#E5E8EB;
+    --gray-100:#F2F4F6; --gray-50:#F9FAFB; --white:#FFFFFF;
+    --green-bg:#E7F9EF; --green-700:#15803D;
+    --amber-500:#F79009; --amber-bg:#FEF3E2; --amber-700:#B54708;
+    --red-bg:#FDECEE; --red-700:#C4303B;
+    --line:var(--gray-200); --line-strong:var(--gray-300);
+    --r-card:20px; --r-box:12px; --r-pill:999px;
+    --shadow-sm:0 1px 3px rgba(0,0,0,.06);
+    --sans:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;
+    --mono:"SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--white);color:var(--gray-900);font-family:var(--sans);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased;margin:0;}
+  .wrap{max-width:1040px;margin:0 auto;padding:48px 24px 120px;}
+  a{color:var(--blue-600);}
+  .doc-head{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:32px;}
+  .kicker{color:var(--blue-500);font-weight:700;font-size:13px;letter-spacing:.08em;}
+  h1{font-size:30px;font-weight:800;letter-spacing:-.02em;margin:10px 0 12px;line-height:1.25;}
+  .lead{color:var(--gray-600);font-size:16px;max-width:72ch;margin:0;}
+  .pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
+  .pill{font-size:13px;padding:6px 12px;border-radius:var(--r-pill);background:var(--gray-100);color:var(--gray-700);}
+  .road{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:18px;font-size:14px;}
+  .road a{border:1px solid var(--line);border-radius:var(--r-pill);padding:6px 14px;background:var(--gray-50);color:var(--gray-800);text-decoration:none;}
+  .road a:hover{border-color:var(--blue-500);color:var(--blue-600);}
+  .road .ar{color:var(--gray-400);}
+  h2{font-size:21px;font-weight:700;margin:48px 0 8px;display:flex;align-items:center;gap:12px;letter-spacing:-.01em;}
+  h2 .n{width:28px;height:28px;border-radius:9px;background:var(--blue-500);color:#fff;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .lead2{color:var(--gray-600);font-size:14.5px;margin:2px 0 18px;}
+  h3{font-size:16px;font-weight:700;color:var(--gray-800);margin:0 0 8px;}
+  p{margin:10px 0;color:var(--gray-800);}
+  code{font-family:var(--mono);font-size:.86em;background:var(--gray-100);padding:1px 6px;border-radius:6px;color:var(--gray-800);}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:var(--r-card);padding:22px 24px;margin:18px 0;box-shadow:var(--shadow-sm);}
+  .card.tight{padding:14px 18px;}
+  .callout{border-radius:var(--r-box);padding:16px 18px;margin:16px 0;border:1px solid var(--line);}
+  .callout .ct{font-weight:700;margin-bottom:4px;}
+  .callout.info{background:var(--blue-50);border-color:#CFE3FF;} .callout.info .ct{color:var(--blue-700);}
+  .callout.warn{background:var(--amber-bg);border-color:#FBDCA6;} .callout.warn .ct{color:var(--amber-700);}
+  .tag{display:inline-flex;align-items:center;font-size:12px;font-weight:700;padding:3px 10px;border-radius:var(--r-pill);white-space:nowrap;}
+  .tag.ok{color:var(--green-700);background:var(--green-bg);}
+  .tag.warn{color:var(--amber-700);background:var(--amber-bg);}
+  .tag.info{color:var(--blue-700);background:var(--blue-50);}
+  .tag.mut{color:var(--gray-600);background:var(--gray-100);}
+  .tbl{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{font-size:12px;font-weight:700;color:var(--gray-500);background:var(--gray-50);letter-spacing:.03em;}
+  tr:last-child td{border-bottom:none;}
+  table.legend{font-size:13px;margin:4px 0 6px;} table.legend td{padding:6px 10px;border:none;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:820px){.grid2{grid-template-columns:1fr;}}
+  /* 정렬 전후 */
+  .cls{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px;}
+  .cls span{font-family:var(--mono);font-size:13px;border-radius:var(--r-pill);padding:4px 12px;border:1px solid var(--line);}
+  .cls .a{background:var(--blue-50);color:var(--blue-700);border-color:#CFE3FF;}
+  .cls .b{background:var(--amber-bg);color:var(--amber-700);border-color:#FBDCA6;}
+  .cls .c{background:var(--green-bg);color:var(--green-700);border-color:#BBEFCF;}
+  .arrow{color:var(--gray-400);font-size:13px;margin:4px 0;}
+  /* 대상 지도 */
+  .files{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin:12px 0;}
+  .files div{font-family:var(--mono);font-size:12.5px;border-radius:10px;padding:8px 12px;border:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;align-items:center;}
+  .files .in{background:var(--white);}
+  .files .chg{background:var(--amber-bg);border-color:#FBDCA6;}
+  .files .out{background:var(--gray-100);color:var(--gray-500);}
+  .files em{font-style:normal;font-family:var(--sans);font-size:11px;font-weight:700;}
+  .flow{display:flex;flex-direction:column;margin:16px 0;}
+  .step{display:flex;gap:16px;position:relative;padding-bottom:20px;}
+  .step:not(:last-child)::before{content:"";position:absolute;left:17px;top:36px;bottom:0;width:2px;background:var(--line);}
+  .step .dot{width:36px;height:36px;border-radius:50%;background:var(--blue-50);color:var(--blue-600);border:2px solid var(--blue-500);display:flex;align-items:center;justify-content:center;font-weight:700;flex:0 0 auto;z-index:1;}
+  .step .body{padding-top:6px;color:var(--gray-700);}
+  .step .body b{color:var(--gray-900);}
+  pre{background:var(--gray-900);color:#E5E8EB;border-radius:var(--r-box);padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:13px;line-height:1.6;margin:14px 0;}
+  pre .c{color:#8B95A1;} pre .s{color:#7EE0A5;}
+  .foot{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--gray-400);font-size:12.5px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="doc-head">
+    <div class="kicker">셋업 03 · 코드 정렬 도구 완료</div>
+    <h1>명령 하나로 코드 모양과 Tailwind 클래스 순서를 맞출 수 있게 됐어요</h1>
+    <p class="lead">Prettier 와 Tailwind 클래스 정렬 플러그인을 넣었어요. <code>npm run format</code> 을 실행하면 코드 모양이 템플릿과 같게 유지되고, 클래스는 정해진 순서로 바뀌어요. 화면 모습은 바뀌지 않아요.</p>
+    <div class="pills">
+      <span class="pill">기준: 플랜 03-코드-정렬-도구 · 2026-11-20</span>
+      <span class="pill">커밋 전 상태 — main 에서 진행 (사용자 결정)</span>
+    </div>
+    <nav class="road"><a href="#s0">① 결론</a><span class="ar">→</span><a href="#s1">② 클래스 정렬</a><span class="ar">→</span><a href="#s2">③ 정렬 대상</a><span class="ar">→</span><a href="#s3">④ 설정</a><span class="ar">→</span><a href="#s4">⑤ 확인 결과</a></nav>
+  </header>
+
+  <h2 id="s0"><span class="n">0</span>확인 항목 5개를 모두 통과했고, 화면에 보이는 변화는 없어요</h2>
+  <table class="legend"><tr>
+    <td><span class="tag ok">통과</span> 직접 실행해 확인함</td>
+    <td><span class="tag mut">해당 없음</span> 이번 태스크 범위 밖</td>
+    <td><span class="tag warn">주의</span> 알아 둘 것</td>
+  </tr></table>
+  <div class="card tight"><div class="tbl">
+    <table>
+      <thead><tr><th style="width:34%">항목</th><th style="width:14%">판정</th><th>메모</th></tr></thead>
+      <tbody>
+        <tr><td>Tailwind 클래스 정렬</td><td><span class="tag ok">통과</span></td><td>02 의 토큰 파일을 읽어 순서를 정해요</td></tr>
+        <tr><td>템플릿 코드 모양 유지</td><td><span class="tag ok">통과</span></td><td>정렬해도 세미콜론 · 큰따옴표가 생기지 않아요</td></tr>
+        <tr><td>Prettier 검사 (저장소 전체)</td><td><span class="tag ok">통과</span></td><td>모든 파일이 정렬된 모양</td></tr>
+        <tr><td>build · lint</td><td><span class="tag ok">통과</span></td><td>오류 없음</td></tr>
+        <tr><td>Vitest</td><td><span class="tag mut">해당 없음</span></td><td>셋업 플랜에 없음</td></tr>
+      </tbody>
+    </table>
+  </div></div>
+
+  <h2 id="s1"><span class="n">1</span>「0Docs」 글자의 클래스 순서만 바뀌었고, 보이는 모습은 그대로예요</h2>
+  <div class="lead2">화면에 닿는 코드는 이 한 줄뿐이에요. 클래스 순서는 스타일 결과에 영향이 없어서 화면 목업은 02 문서 §1 을 그대로 씁니다.</div>
+  <div class="card">
+    <h3>본문 「0Docs」 의 클래스</h3>
+    <div class="cls"><span class="a">text-base</span><span class="c">text-text-brand</span><span class="b">font-semibold</span></div>
+    <div class="arrow">↓ <code>npm run format</code></div>
+    <div class="cls"><span class="a">text-base</span><span class="b">font-semibold</span><span class="c">text-text-brand</span></div>
+    <p style="font-size:13px;color:var(--gray-600)">글자 크기 → 굵기 → 색 순서예요. 플러그인이 <code>text-text-brand</code> 가 색 토큰이라는 걸 알아야 이 순서가 나와요. 그래서 이 결과가 「02 의 토큰 파일을 읽었다」 는 확인이 돼요.</p>
+  </div>
+
+  <h2 id="s2"><span class="n">2</span>정렬 대상은 앱 코드와 설정 파일이고, 규칙 문서 폴더는 빠져요</h2>
+  <div class="lead2"><code>npm run format</code> 을 실행한 결과예요. 주황 = 이번에 실제로 바뀐 파일, 흰색 = 이미 정렬된 모양, 회색 = 대상에서 빠진 것.</div>
+  <div class="files">
+    <div class="chg">src/App.tsx<em>바뀜</em></div>
+    <div class="in">src/main.tsx<em>그대로</em></div>
+    <div class="in">src/index.css<em>그대로</em></div>
+    <div class="in">vite.config.ts<em>그대로</em></div>
+    <div class="in">index.html<em>그대로</em></div>
+    <div class="in">package.json<em>그대로</em></div>
+    <div class="in">tsconfig*.json (3개)<em>그대로</em></div>
+    <div class="in">.oxlintrc.json · .prettierrc<em>그대로</em></div>
+    <div class="in">README.md<em>그대로</em></div>
+    <div class="out">.claude/ (플랜 · 완료 문서)<em>제외</em></div>
+    <div class="out">CLAUDE.md (아직 없음)<em>제외</em></div>
+    <div class="out">dist · node_modules<em>.gitignore 로 제외</em></div>
+  </div>
+  <div class="callout info"><div class="ct">왜 규칙 문서를 빼나요</div>플랜 · 완료 문서는 사람이 쓴 문서라 모양을 자동으로 바꾸지 않아요. <code>dist</code> 와 <code>node_modules</code> 는 Prettier 가 <code>.gitignore</code> 를 읽어 이미 빼므로 따로 적지 않았어요.</div>
+
+  <h2 id="s3"><span class="n">3</span>설정은 파일 두 개와 명령 하나예요</h2>
+  <div class="flow">
+    <div class="step"><div class="dot">1</div><div class="body"><b>설치</b> — Prettier 와 Tailwind 클래스 정렬 플러그인 (개발용 패키지)</div></div>
+    <div class="step"><div class="dot">2</div><div class="body"><b>정렬 규칙 파일</b> — 세미콜론 없음 · 작은따옴표 (템플릿 모양 그대로), 플러그인과 토큰 파일 위치</div></div>
+    <div class="step"><div class="dot">3</div><div class="body"><b>명령</b> — <code>npm run format</code> 으로 저장소 전체 정렬</div></div>
+    <div class="step"><div class="dot">4</div><div class="body"><b>제외 목록 파일</b> — <code>.claude</code> · <code>CLAUDE.md</code></div></div>
+  </div>
+<pre><span class="c">// .prettierrc</span>
+{
+  "semi": false,
+  "singleQuote": true,
+  "plugins": [<span class="s">"prettier-plugin-tailwindcss"</span>],
+  "tailwindStylesheet": <span class="s">"./src/index.css"</span>
+}</pre>
+  <div class="callout warn"><div class="ct">편집기 저장 시 자동 정렬은 넣지 않았어요</div>플랜 범위 밖이에요. 지금은 <code>npm run format</code> 을 직접 실행해야 정렬돼요.</div>
+
+  <h2 id="s4"><span class="n">4</span>확인 항목은 모두 직접 실행했어요</h2>
+  <div class="tbl">
+    <table>
+      <thead><tr><th style="width:46%">확인 항목</th><th style="width:12%">결과</th><th>실행 결과</th></tr></thead>
+      <tbody>
+        <tr><td>format 후 클래스가 <code>text-base font-semibold text-text-brand</code> 순서</td><td><span class="tag ok">통과</span></td><td>그 순서로 바뀜</td></tr>
+        <tr><td>format 이 <code>main.tsx</code> · <code>vite.config.ts</code> 에 세미콜론 · 큰따옴표를 넣지 않음</td><td><span class="tag ok">통과</span></td><td>두 파일 변경 없음 (unchanged)</td></tr>
+        <tr><td><code>src/index.css</code> 정렬 검사</td><td><span class="tag ok">통과</span></td><td>02 모양 그대로</td></tr>
+        <tr><td><code>CLAUDE.md</code> · <code>.claude/x.md</code> 가 제외됨</td><td><span class="tag ok">통과</span></td><td>둘 다 <code>"ignored": true</code></td></tr>
+        <tr><td>build · lint</td><td><span class="tag ok">통과</span></td><td>오류 없음</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="foot">기준 — 플랜 03-코드-정렬-도구 · 실행 가이드 00 · 2026-11-20 · AI 기록 — 03-코드-정렬-도구.ai.md</div>
+</div>
+</body>
+</html>
