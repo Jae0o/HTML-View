@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 /*
  * 기준 우선순위: design-system Skill > 제품 스타일 시스템 > 첨부 디자인 기준 MD
@@ -51,8 +51,8 @@
   --text-logo--line-height: 2rem;
 
   --font-sans:
-    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
-    'Apple SD Gothic Neo', 'Segoe UI', 'Malgun Gothic', sans-serif;
+    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI",
+    "Malgun Gothic", sans-serif;
 
   /* 색 — 무채색은 제품 스타일 시스템 라이트 테마, 대표색만 그린 톤 */
   --color-*: initial;
