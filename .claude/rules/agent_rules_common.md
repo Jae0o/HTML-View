@@ -4,7 +4,7 @@
 
 주제별 상세 규칙:
 
-- 디자인 시스템 — `design-system.md` (`design-system` Skill 사용 지시문. 디자인 값 · 값 규칙은 Skill 이 가진다)
+- 디자인 시스템 — `design-system.md` (`custom-design-system` Skill 사용 지시문. 디자인 값 · 값 규칙은 Skill 이 가진다)
 - 상태 경계 · 훅 분리 · ESLint 사용자 규칙 — `agent_rules_fe.md`
 - 컴포넌트 · 스타일 작성 형식(Tailwind) · Storybook · 테스트 · 아이콘 — `react-conventions.md` / `icon-guide.md`(픽셀 격자 포함)
 - 화면 문구 — `ui-copy.md`
@@ -13,7 +13,7 @@
 
 값이 서로 다르면 위에서부터 처음 맞는 것을 따른다.
 
-1. 공용 디자인 시스템 판정 — `design-system` Skill (jae0-fe 플러그인, `design-system.md` 지시문)
+1. 공용 디자인 시스템 판정 — `custom-design-system` Skill (jae0-fe 플러그인, `design-system.md` 지시문)
 2. 0Docs 디자인 값 — `src/index.css` 의 `@theme` 토큰 (글자 · 색 · 그림자는 프로토타입 확정 값, 디자이너 O)
 3. 프로토타입 화면
 4. 지금 코드

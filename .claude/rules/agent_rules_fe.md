@@ -9,7 +9,7 @@ paths:
 프론트엔드 전용 작업 규칙. 공통 규칙은 `agent_rules_common.md` 참조.
 컴포넌트·스타일 작성 형식·아이콘 컨벤션 상세는 `react-conventions.md` / `icon-guide.md` 참조.
 
-화면에 보이는 값(색·글자·간격·둥글기)은 `design-system.md` → `design-system` Skill 이 기준이다.
+화면에 보이는 값(색·글자·간격·둥글기)은 `design-system.md` → `custom-design-system` Skill 이 기준이다.
 우선순위는 `agent_rules_common.md` 「디자인 기준 · 우선순위」.
 
 ## Custom Hook 분리 기준
