@@ -156,6 +156,7 @@ store/
 쓰지 않는 클래스 — 테마로 막을 수 없어 빌드에는 생기지만 쓰지 않는다.
 
 - px 로 나오는 것: `-px` 붙은 것(`p-px`) · 숫자 붙은 테두리(`border-2`) · `rounded-full`(알약은 `rounded-pill`) · `outline` · `ring` 계열 · `underline-offset-*` · `decoration-<숫자>` · `blur-*` · `drop-shadow-*` · `inset-shadow-*` · 대괄호 px
+  - 예외: `drop-shadow-logo` · `drop-shadow-logo-glow` 는 쓴다. `@theme` 에 rem 토큰으로 새로 건 로고 그림자다 (기능 1차 확인 대상 16, 2026-11-21 결정)
 - `html` 62.5% 때문에 작아지는 이름 너비: `max-w-sm` · `w-sm` 등
 - 토큰에 없는 글자 간격 · 줄 높이: `tracking-*` · `leading-*`
 
