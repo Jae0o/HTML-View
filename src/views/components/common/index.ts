@@ -1,5 +1,6 @@
 export * from "./BrandLogo";
 export * from "./Button";
+export * from "./ConfirmDialog";
 export * from "./EmptyState";
 export * from "./ErrorBoundary";
 export * from "./ErrorFallback";
