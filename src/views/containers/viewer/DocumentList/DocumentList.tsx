@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type TransitionEvent, useState } from "react";
 
 import { filterFolders, findDocument, isFolderPickerSupported, useFolderStore } from "@libs/features/folder";
 import { favoriteKey, resolveFavorites, useViewerStore } from "@libs/features/viewer";
@@ -11,9 +11,12 @@ import { favoriteLabel, filterFavorites } from "./DocumentList.utils";
 import { DocumentRow, FolderRows, HtmlFolderRows } from "./components";
 import { useClickAway } from "./hooks";
 
-// 목록 상자 — 닫혀 있을 때는 그리지 않고 감추기만 한다(줄의 펼침 상태가 남는다)
-const SURFACE_CLASS = "absolute top-12 left-16 z-400 flex max-h-[calc(100vh-2.4rem)] w-[48rem] flex-col gap-8 p-12";
-const SURFACE_HIDDEN_CLASS = "hidden";
+// 목록 상자 — 닫혀 있을 때는 지우지 않고 감추기만 한다(줄의 펼침 상태가 남는다).
+// 열고 닫을 때 200ms 동안 흐려지며 위로 8px 움직인다. 움직임 줄이기 설정이면 흐려지기만 한다. 사라지는 동안은 누름을 받지 않는다
+const SURFACE_OPEN_CLASS =
+  "absolute top-12 left-16 z-400 flex max-h-[calc(100vh-2.4rem)] w-[48rem] flex-col gap-8 p-12 transition-[opacity,translate,visibility] duration-200";
+const SURFACE_CLOSED_CLASS =
+  "pointer-events-none invisible absolute top-12 left-16 z-400 flex max-h-[calc(100vh-2.4rem)] w-[48rem] flex-col gap-8 p-12 opacity-0 transition-[opacity,translate,visibility] duration-200 motion-safe:-translate-y-8";
 
 /** 문서 목록 — 본문 위 왼쪽에 떠 있다. 접거나 문서를 고르면 열기 버튼만 남는다 */
 const DocumentList = () => {
@@ -34,6 +37,14 @@ const DocumentList = () => {
   // 고른 문서를 찾을 수 있을 때만 목록 밖을 누르면 닫는다 — 빈 화면 · 문서를 찾지 못한 화면에서는 닫지 않는다
   const markInside = useClickAway(isListVisible && isDocumentShown, dismissList);
 
+  // 목록 상자가 화면에 남아 있는지 — 닫을 때는 사라짐이 끝난 뒤에 열기 버튼을 보인다(두 개가 겹쳐 보이지 않게)
+  const [isSurfaceShown, setIsSurfaceShown] = useState(isListVisible);
+  if (isListVisible && !isSurfaceShown) setIsSurfaceShown(true);
+
+  const handleSurfaceTransitionEnd = (e: TransitionEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget && e.propertyName === "opacity" && !isListVisible) setIsSurfaceShown(false);
+  };
+
   // 검색어는 기억하지 않는다 — 입력하는 대로 목록을 거른다
   const [query, setQuery] = useState("");
   const isSearching = query.trim() !== "";
@@ -49,7 +60,7 @@ const DocumentList = () => {
 
   return (
     <>
-      {!isListVisible && (
+      {!isSurfaceShown && (
         <div className="absolute top-12 left-16">
           <Tooltip label="목록 열기">
             <IconButton
@@ -66,7 +77,8 @@ const DocumentList = () => {
         role="navigation"
         aria-label="문서 목록"
         onPointerDown={markInside}
-        className={isListVisible ? SURFACE_CLASS : SURFACE_HIDDEN_CLASS}
+        onTransitionEnd={handleSurfaceTransitionEnd}
+        className={isListVisible ? SURFACE_OPEN_CLASS : SURFACE_CLOSED_CLASS}
       >
         <div className="flex items-center gap-8">
           <SearchInput
