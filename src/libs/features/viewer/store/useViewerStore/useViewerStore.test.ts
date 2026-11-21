@@ -18,9 +18,11 @@ const { default: useViewerStore } = await import("./useViewerStore");
 
 const readSaved = () => JSON.parse(memory.get(VIEWER_STORAGE_KEY) ?? "{}").state;
 
+const DOCUMENT = { folderId: "a", path: "plan-a", fileName: "결과.html" };
+
 describe("useViewerStore", () => {
   beforeEach(() => {
-    useViewerStore.setState({ isListOpen: true });
+    useViewerStore.setState({ isListOpen: true, isListDismissed: false, selectedDocument: null });
   });
 
   it("목록은 처음에 열려 있다", () => {
@@ -30,10 +32,24 @@ describe("useViewerStore", () => {
   it("toggleList 로 접고 열며 그 상태를 기기에 기억한다", () => {
     useViewerStore.getState().toggleList();
     expect(useViewerStore.getState().isListOpen).toBe(false);
-    expect(readSaved()).toEqual({ isListOpen: false });
+    expect(readSaved().isListOpen).toBe(false);
 
     useViewerStore.getState().toggleList();
     expect(useViewerStore.getState().isListOpen).toBe(true);
-    expect(readSaved()).toEqual({ isListOpen: true });
+    expect(readSaved().isListOpen).toBe(true);
+  });
+
+  it("문서를 고르면 목록이 잠깐 닫히고, 고른 문서만 기기에 기억한다", () => {
+    useViewerStore.getState().selectDocument(DOCUMENT);
+
+    expect(useViewerStore.getState().isListDismissed).toBe(true);
+    expect(readSaved()).toEqual({ isListOpen: true, selectedDocument: DOCUMENT });
+  });
+
+  it("잠깐 닫힌 목록에서 toggleList 를 부르면 다시 연다", () => {
+    useViewerStore.getState().dismissList();
+    useViewerStore.getState().toggleList();
+
+    expect(useViewerStore.getState()).toMatchObject({ isListOpen: true, isListDismissed: false });
   });
 });

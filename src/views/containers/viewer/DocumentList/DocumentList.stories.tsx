@@ -39,7 +39,7 @@ const meta: Meta<typeof DocumentList> = {
   ],
   beforeEach: () => {
     useFolderStore.setState({ isRestored: true, folders: FOLDERS });
-    useViewerStore.setState({ isListOpen: true });
+    useViewerStore.setState({ isListOpen: true, isListDismissed: false, selectedDocument: null });
   },
 };
 
@@ -49,6 +49,15 @@ type Story = StoryObj<typeof meta>;
 
 /** 열린 목록 — 등록 폴더는 펼쳐 있고 HTML 폴더는 눌러서 펼친다 */
 export const Open: Story = {};
+
+/** 보던 문서가 있을 때 — 그 HTML 폴더가 펼쳐 있고 줄이 초록 바탕이다 */
+export const WithSelectedDocument: Story = {
+  beforeEach: () => {
+    useViewerStore.setState({
+      selectedDocument: { folderId: "sample", path: "001-create-side-menu", fileName: "플랜.html" },
+    });
+  },
+};
 
 /** 접힌 목록 — 열기 버튼만 남는다 */
 export const Closed: Story = {

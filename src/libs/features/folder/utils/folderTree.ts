@@ -1,4 +1,4 @@
-import type { HtmlFolder, ScannedFile } from "../types";
+import type { DocumentEntry, DocumentLocation, HtmlFolder, RegisteredFolder, ScannedFile } from "../types";
 
 /** 경로를 이어 붙이는 글자 — 플랜명 / completed */
 const PATH_SEPARATOR = " / ";
@@ -34,3 +34,13 @@ export const groupHtmlFiles = <THandle>(files: ScannedFile<THandle>[]): HtmlFold
     }))
     .toSorted((a, b) => collator.compare(a.path, b.path));
 };
+
+/** 자리로 문서를 찾는다 — 폴더가 없거나 연결이 끊겼거나 문서가 없어졌으면 undefined */
+export const findDocument = (
+  folders: RegisteredFolder[],
+  { folderId, path, fileName }: DocumentLocation,
+): DocumentEntry | undefined =>
+  folders
+    .find(folder => folder.id === folderId)
+    ?.htmlFolders.find(htmlFolder => htmlFolder.path === path)
+    ?.documents.find(document => document.fileName === fileName);

@@ -1,15 +1,30 @@
 import { type RegisteredFolder, useFolderStore } from "@libs/features/folder";
+import { useViewerStore } from "@libs/features/viewer";
 
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import ViewerBody from "./ViewerBody";
 
-// 스토리용 등록 폴더 — 화면은 폴더가 있는지만 본다
+const SAMPLE_HTML =
+  '<h1>스토리용 문서</h1><p>고른 문서가 본문 전체에 열린다.</p><p><a href="#end">같은 문서 안 이동</a> · <a href="other.html">다른 파일 링크 (눌러도 아무 일도 없다)</a></p><p id="end">문서 끝</p>';
+
+// 스토리용 등록 폴더 — 문서 한 개가 들어 있고, 읽으면 위 HTML 이 나온다
 const SAMPLE_FOLDER = {
   id: "sample",
   name: "sample-project",
   status: "connected",
-  htmlFolders: [],
+  htmlFolders: [
+    {
+      path: "plan-a",
+      documents: [
+        {
+          name: "결과",
+          fileName: "결과.html",
+          handle: { getFile: async () => new File([SAMPLE_HTML], "결과.html") },
+        },
+      ],
+    },
+  ],
 } as unknown as RegisteredFolder;
 
 const meta: Meta<typeof ViewerBody> = {
@@ -33,6 +48,7 @@ type Story = StoryObj<typeof meta>;
 export const NoFolder: Story = {
   beforeEach: () => {
     useFolderStore.setState({ isRestored: true, folders: [] });
+    useViewerStore.setState({ selectedDocument: null });
   },
 };
 
@@ -40,5 +56,22 @@ export const NoFolder: Story = {
 export const NoDocument: Story = {
   beforeEach: () => {
     useFolderStore.setState({ isRestored: true, folders: [SAMPLE_FOLDER] });
+    useViewerStore.setState({ selectedDocument: null });
+  },
+};
+
+/** 고른 문서가 본문 전체에 열린다 */
+export const DocumentShown: Story = {
+  beforeEach: () => {
+    useFolderStore.setState({ isRestored: true, folders: [SAMPLE_FOLDER] });
+    useViewerStore.setState({ selectedDocument: { folderId: "sample", path: "plan-a", fileName: "결과.html" } });
+  },
+};
+
+/** 고른 문서를 찾지 못했다 (옮겨짐 · 지워짐 · 연결 끊김) */
+export const DocumentError: Story = {
+  beforeEach: () => {
+    useFolderStore.setState({ isRestored: true, folders: [SAMPLE_FOLDER] });
+    useViewerStore.setState({ selectedDocument: { folderId: "sample", path: "plan-a", fileName: "없는 문서.html" } });
   },
 };

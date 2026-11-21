@@ -22,6 +22,15 @@ export interface ScannedFile<THandle = FileSystemFileHandle> {
   handle: THandle;
 }
 
+/** 문서 한 개의 자리 — 등록 폴더 · 경로 · 이름으로 가리킨다 (기기에 기억할 수 있는 모양) */
+export interface DocumentLocation {
+  folderId: string;
+  /** HTML 폴더의 경로 */
+  path: string;
+  /** 문서의 파일 이름 (확장자 포함) */
+  fileName: string;
+}
+
 /** connected 읽을 수 있음 · disconnected 읽기 권한이 풀렸거나 폴더를 찾을 수 없음 */
 export type FolderStatus = "connected" | "disconnected";
 

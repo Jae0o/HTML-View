@@ -42,6 +42,11 @@ export const Document: Story = {
   args: { depth: 2, label: "구현 분석", icon: <FileHtmlIcon className="shrink-0 text-text-tertiary" /> },
 };
 
+/** 지금 보고 있는 문서 */
+export const SelectedDocument: Story = {
+  args: { depth: 2, label: "구현 분석", selected: true, icon: <FileHtmlIcon className="shrink-0" /> },
+};
+
 /** 이름이 길면 한 줄로 자르고, 마우스를 올리면 펼친다 */
 export const LongLabel: Story = {
   args: {

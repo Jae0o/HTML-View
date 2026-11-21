@@ -10,7 +10,9 @@ export interface TreeRowProps {
   label: string;
   /** 펼칠 수 있는 줄일 때만 넘긴다 — 화살표가 붙는다 */
   expanded?: boolean;
-  /** 이름 뒤에 붙는 표시 (개수 꼬리표). 누를 수 없다 — 이 자리를 눌러도 줄이 눌린다 */
+  /** 지금 보고 있는 문서의 줄 */
+  selected?: boolean;
+  /** 이름 뒤에 붙는 것 (개수 꼬리표 · 버튼) */
   trailing?: ReactNode;
   /** 줄 오른쪽 끝의 버튼. 줄과 따로 눌린다 */
   actions?: ReactNode;

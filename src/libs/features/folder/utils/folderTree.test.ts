@@ -1,4 +1,5 @@
-import { groupHtmlFiles, isExcludedDirectory, isHtmlFile } from "./folderTree";
+import type { RegisteredFolder } from "../types";
+import { findDocument, groupHtmlFiles, isExcludedDirectory, isHtmlFile } from "./folderTree";
 
 import { describe, expect, it } from "vitest";
 
@@ -57,5 +58,22 @@ describe("groupHtmlFiles", () => {
       ["a", "a.htm"],
       ["a", "a.html"],
     ]);
+  });
+});
+
+describe("findDocument", () => {
+  const document = { name: "결과", fileName: "결과.html", handle: "결과.html" };
+  const folders = [
+    { id: "a", name: "docs", status: "connected", htmlFolders: [{ path: "plan-a", documents: [document] }] },
+  ] as unknown as RegisteredFolder[];
+
+  it("등록 폴더 · 경로 · 파일 이름이 모두 맞는 문서를 찾는다", () => {
+    expect(findDocument(folders, { folderId: "a", path: "plan-a", fileName: "결과.html" })).toEqual(document);
+  });
+
+  it("하나라도 다르면 찾지 못한다", () => {
+    expect(findDocument(folders, { folderId: "b", path: "plan-a", fileName: "결과.html" })).toBeUndefined();
+    expect(findDocument(folders, { folderId: "a", path: "plan-b", fileName: "결과.html" })).toBeUndefined();
+    expect(findDocument(folders, { folderId: "a", path: "plan-a", fileName: "결과.htm" })).toBeUndefined();
   });
 });
