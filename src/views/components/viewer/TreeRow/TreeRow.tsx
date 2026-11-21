@@ -16,7 +16,7 @@ const DEPTH_CLASS: Record<TreeRowDepth, string> = {
 const TreeRow = ({ depth, icon, label, expanded, selected = false, trailing, actions, onClick }: TreeRowProps) => (
   <div
     className={clsx(
-      "relative flex h-32 items-center gap-8 rounded-6 pr-8 text-base",
+      "group relative flex h-32 items-center gap-8 rounded-6 pr-8 text-base",
       DEPTH_CLASS[depth],
       selected ? "bg-brand-bg-muted font-semibold text-text-brand" : "text-text-primary",
       !selected && onClick && "hover:bg-brand-bg-subtle",
@@ -47,7 +47,7 @@ const TreeRow = ({ depth, icon, label, expanded, selected = false, trailing, act
       <TruncatedText text={label} />
     </div>
     {trailing}
-    {actions && <div className="relative flex items-center">{actions}</div>}
+    {actions && <div className="relative flex items-center gap-4">{actions}</div>}
   </div>
 );
 

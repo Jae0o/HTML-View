@@ -1,7 +1,7 @@
 import { useToastStore } from "@libs/features/toast";
 
 import type { FolderRecord, RegisteredFolder } from "../../types";
-import { readFolderRecords, scanFolder, writeFolderRecord } from "../../utils";
+import { deleteFolderRecord, readFolderRecords, scanFolder, writeFolderRecord } from "../../utils";
 import useFolderStore from "./useFolderStore";
 import { FOLDER_MESSAGE } from "./useFolderStore.constants";
 
@@ -11,6 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("../../utils", () => ({
   readFolderRecords: vi.fn(),
   writeFolderRecord: vi.fn(),
+  deleteFolderRecord: vi.fn(),
   scanFolder: vi.fn(),
 }));
 
@@ -52,6 +53,7 @@ describe("useFolderStore", () => {
   beforeEach(() => {
     vi.mocked(scanFolder).mockResolvedValue([]);
     vi.mocked(writeFolderRecord).mockResolvedValue();
+    vi.mocked(deleteFolderRecord).mockResolvedValue();
     useFolderStore.setState({ folders: [], isRestored: false });
     useToastStore.getState().hide();
   });
@@ -147,5 +149,26 @@ describe("useFolderStore", () => {
 
     expect(useFolderStore.getState().folders[0].status).toBe("disconnected");
     expect(scanFolder).not.toHaveBeenCalled();
+  });
+
+  it("removeFolder 는 기기에 저장한 연결을 지우고 목록에서 뺀다", async () => {
+    useFolderStore.setState({
+      folders: [asFolder("a", fakeHandle("docs"), "connected"), asFolder("b", fakeHandle("notes"), "connected")],
+    });
+
+    await useFolderStore.getState().removeFolder("a");
+
+    expect(deleteFolderRecord).toHaveBeenCalledWith("a");
+    expect(useFolderStore.getState().folders.map(folder => folder.id)).toEqual(["b"]);
+  });
+
+  it("removeFolder 가 기기에서 지우지 못하면 목록을 그대로 두고 알린다", async () => {
+    useFolderStore.setState({ folders: [asFolder("a", fakeHandle("docs"), "connected")] });
+    vi.mocked(deleteFolderRecord).mockRejectedValue(new Error("지우기 실패"));
+
+    await useFolderStore.getState().removeFolder("a");
+
+    expect(useFolderStore.getState().folders).toHaveLength(1);
+    expect(useToastStore.getState().message).toBe(FOLDER_MESSAGE.removeFailed);
   });
 });

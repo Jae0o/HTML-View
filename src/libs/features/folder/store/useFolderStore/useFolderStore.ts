@@ -1,7 +1,7 @@
 import { useToastStore } from "@libs/features/toast";
 
 import type { FolderRecord, RegisteredFolder } from "../../types";
-import { readFolderRecords, scanFolder, writeFolderRecord } from "../../utils";
+import { deleteFolderRecord, readFolderRecords, scanFolder, writeFolderRecord } from "../../utils";
 import { FOLDER_MESSAGE } from "./useFolderStore.constants";
 import type { FolderState } from "./useFolderStore.types";
 
@@ -94,6 +94,16 @@ const useFolderStore = create<FolderState>((set, get) => ({
       }));
     } catch {
       useToastStore.getState().show(FOLDER_MESSAGE.reconnectFailed);
+    }
+  },
+
+  removeFolder: async id => {
+    try {
+      await deleteFolderRecord(id);
+
+      set(state => ({ folders: state.folders.filter(folder => folder.id !== id) }));
+    } catch {
+      useToastStore.getState().show(FOLDER_MESSAGE.removeFailed);
     }
   },
 
