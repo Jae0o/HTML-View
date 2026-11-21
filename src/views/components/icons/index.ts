@@ -4,6 +4,7 @@ export * from "./FileHtmlIcon";
 export * from "./FolderIcon";
 export * from "./FolderPlusIcon";
 export * from "./MenuIcon";
+export * from "./MoreIcon";
 export * from "./SearchIcon";
 export * from "./StarIcon";
 export * from "./types";

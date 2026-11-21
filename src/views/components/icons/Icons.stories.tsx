@@ -6,10 +6,11 @@ import { FileHtmlIcon } from "./FileHtmlIcon";
 import { FolderIcon } from "./FolderIcon";
 import { FolderPlusIcon } from "./FolderPlusIcon";
 import { MenuIcon } from "./MenuIcon";
+import { MoreIcon } from "./MoreIcon";
 import { SearchIcon } from "./SearchIcon";
 import { StarIcon } from "./StarIcon";
 
-/** 아이콘 8종을 한 화면에서 본다 — 크기는 쓰는 자리의 값(16px · 폴더와 문서는 20px)이다 */
+/** 아이콘 9종을 한 화면에서 본다 — 크기는 쓰는 자리의 값(16px · 폴더와 문서는 20px)이다 */
 const ICONS = [
   { name: "ChevronRightIcon", icon: <ChevronRightIcon size={16} /> },
   { name: "CloseIcon", icon: <CloseIcon size={16} /> },
@@ -17,6 +18,7 @@ const ICONS = [
   { name: "FolderIcon", icon: <FolderIcon size={20} /> },
   { name: "FolderPlusIcon", icon: <FolderPlusIcon size={16} /> },
   { name: "MenuIcon", icon: <MenuIcon size={16} /> },
+  { name: "MoreIcon", icon: <MoreIcon size={16} /> },
   { name: "SearchIcon", icon: <SearchIcon size={16} /> },
   { name: "StarIcon", icon: <StarIcon size={16} /> },
 ];
