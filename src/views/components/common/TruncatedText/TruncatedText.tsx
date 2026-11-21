@@ -45,13 +45,15 @@ const TruncatedText = ({ text, className }: TruncatedTextProps) => {
   const { ref, isTruncated } = useTextTruncated(text);
   const popRef = useRef<HTMLSpanElement>(null);
   const popId = useId();
+  // 사라지는 동안에도 자리를 그대로 두어야 한다 — 열림만 끄고, 자리는 사라짐이 끝나면 비운다
   const [pop, setPop] = useState<PopState | null>(null);
+  const [open, setOpen] = useState(false);
 
   // 잘림이 풀리면(폭이 넓어짐) 열려 있어도 그리지 않는다 — effect 로 닫지 않고 렌더 중에 가른다
   const shown = isTruncated ? pop : null;
-  const visible = shown !== null;
+  const visible = shown !== null && open;
 
-  const close = useCallback(() => setPop(null), []);
+  const close = useCallback(() => setOpen(false), []);
 
   const show = () => {
     const element = ref.current;
@@ -71,6 +73,7 @@ const TruncatedText = ({ text, className }: TruncatedTextProps) => {
         background: findBackground(element),
       },
     });
+    setOpen(true);
   };
 
   const handleFocus = (e: FocusEvent<HTMLSpanElement>) => {
@@ -126,13 +129,19 @@ const TruncatedText = ({ text, className }: TruncatedTextProps) => {
             ref={popRef}
             id={popId}
             role="tooltip"
-            className="fixed z-9999 rounded-6 border border-border-default px-6 pt-[0.1rem] pb-4 wrap-anywhere shadow-float"
+            className={clsx(
+              "fixed z-9999 rounded-6 border border-border-default px-6 pt-[0.1rem] pb-4 wrap-anywhere shadow-float transition-opacity starting:opacity-0",
+              !open && "pointer-events-none opacity-0",
+            )}
             // 자리 · 폭과 쓰는 자리의 글자 모양은 그릴 때 잰 값이라 클래스로 적을 수 없다. 화면에서 잰 px 를 그대로 넣는다 (rem 으로 바꾸면 브라우저 글자 크기 설정에 따라 어긋난다)
             style={{
               ...shown.look,
               top: `${shown.top}px`,
               left: `${shown.left}px`,
               width: `${shown.width}px`,
+            }}
+            onTransitionEnd={() => {
+              if (!open) setPop(null);
             }}
           >
             {text}
