@@ -3,14 +3,15 @@ import { useState } from "react";
 import { type RegisteredFolder, useFolderStore } from "@libs/features/folder";
 import { useViewerStore } from "@libs/features/viewer";
 
-import { Button, ConfirmDialog, IconButton, Tooltip } from "@views/components/common";
-import { CloseIcon, FolderIcon } from "@views/components/icons";
+import { Button, ConfirmDialog } from "@views/components/common";
+import { FolderIcon } from "@views/components/icons";
 import { TreeRow } from "@views/components/viewer";
 
-import { ROOT_FOLDER_LABEL, ROW_ACTION_REVEAL_CLASS } from "../../DocumentList.constants";
+import { ROOT_FOLDER_LABEL } from "../../DocumentList.constants";
 import { Collapse } from "../Collapse";
 import { FavoriteButton } from "../FavoriteButton";
 import { HtmlFolderRows } from "../HtmlFolderRows";
+import { MoreMenu } from "../MoreMenu";
 
 interface FolderRowsProps {
   folder: RegisteredFolder;
@@ -22,7 +23,7 @@ interface FolderRowsProps {
 
 const NO_PATHS: string[] = [];
 
-/** 등록 폴더 한 줄과 그 안의 HTML 폴더 줄들. 등록 해제 확인 창도 여기서 띄운다 */
+/** 등록 폴더 한 줄과 그 안의 HTML 폴더 줄들. 줄 오른쪽 끝 ⋯ 메뉴의 「등록 해제」 확인 창도 여기서 띄운다 */
 const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PATHS }: FolderRowsProps) => {
   const reconnect = useFolderStore(state => state.reconnect);
   const removeFolder = useFolderStore(state => state.removeFolder);
@@ -60,15 +61,7 @@ const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PAT
               </Button>
             )}
             <FavoriteButton item={{ kind: "folder", folderId: folder.id }} />
-            <Tooltip label="등록 해제">
-              <IconButton
-                size="s"
-                aria-label="등록 해제"
-                icon={<CloseIcon />}
-                className={ROW_ACTION_REVEAL_CLASS}
-                onClick={() => setIsRemoveOpen(true)}
-              />
-            </Tooltip>
+            <MoreMenu items={[{ label: "등록 해제", onSelect: () => setIsRemoveOpen(true) }]} />
           </>
         }
         onClick={isConnected && !forceExpanded ? () => setIsExpanded(previous => !previous) : undefined}

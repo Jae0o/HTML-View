@@ -38,11 +38,11 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-/** 줄에 마우스를 올리면 오른쪽에 등록 해제(✕) 버튼이 보인다. 누르면 확인 창이 뜬다 */
+/** 줄에 마우스를 올리면 오른쪽 끝에 ⋯ 버튼이 보인다. 누르면 메뉴가 열리고, 「등록 해제」 를 누르면 확인 창이 뜬다 */
 export const Connected: Story = {};
 
 /** HTML 문서가 없는 등록 폴더 */
 export const Empty: Story = { args: { folder: { ...FOLDER, htmlFolders: [] } } };
 
-/** 연결이 끊긴 등록 폴더 — 「다시 연결」 과 등록 해제 버튼만 눌린다 */
+/** 연결이 끊긴 등록 폴더 — 「다시 연결」 · 별 · ⋯ 만 눌린다 */
 export const Disconnected: Story = { args: { folder: { ...FOLDER, status: "disconnected", htmlFolders: [] } } };

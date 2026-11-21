@@ -22,7 +22,10 @@ const TreeRow = ({ depth, icon, label, expanded, selected = false, trailing, act
       "group relative flex min-h-[3.6rem] items-start gap-8 rounded-6 py-8 pr-8 text-base",
       DEPTH_CLASS[depth],
       selected ? "bg-brand-bg-muted font-semibold text-text-brand" : "text-text-primary",
-      !selected && onClick && "hover:bg-brand-bg-subtle",
+      // 줄 안의 메뉴(⋯)를 연 동안에도 마우스를 올린 바탕을 유지한다
+      !selected &&
+        onClick &&
+        "hover:bg-brand-bg-subtle has-[[aria-haspopup=menu][aria-expanded=true]]:bg-brand-bg-subtle",
     )}
   >
     {onClick && (
