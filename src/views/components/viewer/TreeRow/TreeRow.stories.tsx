@@ -11,7 +11,7 @@ const meta: Meta<typeof TreeRow> = {
   args: { onClick: () => {} },
   decorators: [
     Story => (
-      <div className="w-[33.6rem]">
+      <div className="w-[45.6rem]">
         <Story />
       </div>
     ),
@@ -47,7 +47,7 @@ export const SelectedDocument: Story = {
   args: { depth: 2, label: "구현 분석", selected: true, icon: <FileHtmlIcon className="shrink-0" /> },
 };
 
-/** 이름이 길면 한 줄로 자르고, 마우스를 올리면 펼친다 */
+/** 이름이 길면 두 줄까지 보이고, 넘치면 마우스를 올렸을 때 그 자리에서 펼친다 — 펼친 상자는 꼬리표 앞에서 끝나고 마우스를 받지 않는다 */
 export const LongLabel: Story = {
   args: {
     depth: 1,

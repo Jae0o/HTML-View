@@ -12,11 +12,14 @@ const DEPTH_CLASS: Record<TreeRowDepth, string> = {
   2: "pl-40",
 };
 
-/** 목록 줄 — 등록 폴더 · HTML 폴더 · 문서가 같은 모양을 쓴다 */
+/**
+ * 목록 줄 — 등록 폴더 · HTML 폴더 · 문서가 같은 모양을 쓴다.
+ * 이름은 두 줄까지 보인다. 줄은 위로 맞추고, 앞 아이콘 · 꼬리표 · 버튼은 글자 한 줄 높이(20px) 칸 가운데에 둬 첫 줄과 맞춘다
+ */
 const TreeRow = ({ depth, icon, label, expanded, selected = false, trailing, actions, onClick }: TreeRowProps) => (
   <div
     className={clsx(
-      "group relative flex h-32 items-center gap-8 rounded-6 pr-8 text-base",
+      "group relative flex min-h-[3.6rem] items-start gap-8 rounded-6 py-8 pr-8 text-base",
       DEPTH_CLASS[depth],
       selected ? "bg-brand-bg-muted font-semibold text-text-brand" : "text-text-primary",
       !selected && onClick && "hover:bg-brand-bg-subtle",
@@ -32,22 +35,30 @@ const TreeRow = ({ depth, icon, label, expanded, selected = false, trailing, act
         className="absolute inset-0 cursor-pointer rounded-6 bg-transparent"
       />
     )}
-    {expanded !== undefined && (
-      <ChevronRightIcon
-        size={16}
-        className={clsx("shrink-0 text-text-tertiary", expanded && "rotate-90")}
-      />
+    {(expanded !== undefined || icon) && (
+      <div className="flex h-20 shrink-0 items-center gap-8">
+        {expanded !== undefined && (
+          <ChevronRightIcon
+            size={16}
+            className={clsx("shrink-0 text-text-tertiary", expanded && "rotate-90")}
+          />
+        )}
+        {icon}
+      </div>
     )}
-    {icon}
     {/* 이름은 버튼 위에 올려 마우스를 받는다(말줄임 펼침). 이름을 눌러도 줄이 눌리게 같은 동작을 건다 */}
     <div
       className={clsx("relative min-w-0 flex-1", onClick && "cursor-pointer")}
       onClick={onClick}
     >
-      <TruncatedText text={label} />
+      <TruncatedText
+        text={label}
+        lines={2}
+        fitCell
+      />
     </div>
-    {trailing}
-    {actions && <div className="relative flex items-center gap-4">{actions}</div>}
+    {trailing && <div className="flex h-20 shrink-0 items-center">{trailing}</div>}
+    {actions && <div className="relative flex h-20 items-center gap-4">{actions}</div>}
   </div>
 );
 
