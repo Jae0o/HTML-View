@@ -10,8 +10,8 @@ export interface FolderState {
   addFolder: () => Promise<void>;
   /** 연결이 끊긴 폴더의 읽기 권한을 다시 묻고, 받으면 다시 훑는다. 누른 자리에서 불러야 한다 */
   reconnect: (id: string) => Promise<void>;
-  /** 등록을 해제한다 — 기기에 저장한 연결을 지우고 목록에서 뺀다. 폴더의 파일은 건드리지 않는다 */
-  removeFolder: (id: string) => Promise<void>;
+  /** 등록을 해제한다 — 기기에 저장한 연결을 지우고 목록에서 뺀다. 폴더의 파일은 건드리지 않는다. 해제했으면 true */
+  removeFolder: (id: string) => Promise<boolean>;
   /** 폴더 하나를 다시 훑는다. 읽기 권한이 풀렸으면 연결 끊김으로 바꾼다 (권한을 다시 묻지는 않는다) */
   refreshFolder: (id: string) => Promise<void>;
 }

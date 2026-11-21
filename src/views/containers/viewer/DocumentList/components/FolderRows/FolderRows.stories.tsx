@@ -30,7 +30,7 @@ const meta: Meta<typeof FolderRows> = {
     ),
   ],
   beforeEach: () => {
-    useViewerStore.setState({ selectedDocument: null });
+    useViewerStore.setState({ selectedDocument: null, favorites: [] });
   },
 };
 

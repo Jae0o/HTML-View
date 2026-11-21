@@ -21,7 +21,7 @@ const meta: Meta<typeof DocumentRow> = {
     ),
   ],
   beforeEach: () => {
-    useViewerStore.setState({ selectedDocument: null });
+    useViewerStore.setState({ selectedDocument: null, favorites: [] });
   },
 };
 

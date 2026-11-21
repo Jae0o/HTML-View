@@ -39,7 +39,13 @@ const meta: Meta<typeof DocumentList> = {
   ],
   beforeEach: () => {
     useFolderStore.setState({ isRestored: true, folders: FOLDERS });
-    useViewerStore.setState({ isListOpen: true, isListDismissed: false, selectedDocument: null });
+    useViewerStore.setState({
+      isListOpen: true,
+      isListDismissed: false,
+      selectedDocument: null,
+      favorites: [],
+      listView: "all",
+    });
   },
 };
 
@@ -70,5 +76,38 @@ export const Closed: Story = {
 export const NoFolder: Story = {
   beforeEach: () => {
     useFolderStore.setState({ isRestored: true, folders: [] });
+  },
+};
+
+/** 전체 보기에서 켠 별 — 켜진 줄은 노란 별이 늘 보인다 */
+export const WithFavorites: Story = {
+  beforeEach: () => {
+    useViewerStore.setState({
+      favorites: [
+        { kind: "htmlFolder", folderId: "sample", path: "001-create-side-menu" },
+        { kind: "folder", folderId: "empty" },
+      ],
+    });
+  },
+};
+
+/** 즐겨찾기만 보기 — 켠 순서대로. HTML 폴더는 「등록 폴더 / 경로」 이름으로 보인다 */
+export const FavoritesView: Story = {
+  beforeEach: () => {
+    useViewerStore.setState({
+      listView: "favorites",
+      favorites: [
+        { kind: "document", folderId: "sample", path: "001-create-side-menu", fileName: "플랜.html" },
+        { kind: "htmlFolder", folderId: "sample", path: "001-create-side-menu" },
+        { kind: "folder", folderId: "sample" },
+      ],
+    });
+  },
+};
+
+/** 즐겨찾기만 보기 — 즐겨찾기가 없을 때 */
+export const FavoritesViewEmpty: Story = {
+  beforeEach: () => {
+    useViewerStore.setState({ listView: "favorites", favorites: [] });
   },
 };

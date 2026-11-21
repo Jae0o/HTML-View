@@ -102,8 +102,12 @@ const useFolderStore = create<FolderState>((set, get) => ({
       await deleteFolderRecord(id);
 
       set(state => ({ folders: state.folders.filter(folder => folder.id !== id) }));
+
+      return true;
     } catch {
       useToastStore.getState().show(FOLDER_MESSAGE.removeFailed);
+
+      return false;
     }
   },
 

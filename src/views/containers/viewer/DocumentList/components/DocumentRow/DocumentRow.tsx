@@ -4,6 +4,8 @@ import { useViewerStore } from "@libs/features/viewer";
 import { FileHtmlIcon } from "@views/components/icons";
 import { TreeRow, type TreeRowDepth } from "@views/components/viewer";
 
+import { FavoriteButton } from "../FavoriteButton";
+
 interface DocumentRowProps {
   folderId: string;
   /** 문서가 든 HTML 폴더의 경로 */
@@ -28,6 +30,7 @@ const DocumentRow = ({ folderId, path, document, depth }: DocumentRowProps) => {
       label={document.name}
       icon={<FileHtmlIcon className={isSelected ? "shrink-0" : "shrink-0 text-text-tertiary"} />}
       selected={isSelected}
+      actions={<FavoriteButton item={{ kind: "document", folderId, path, fileName: document.fileName }} />}
       onClick={() => selectDocument({ folderId, path, fileName: document.fileName })}
     />
   );

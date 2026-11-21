@@ -22,7 +22,13 @@ const DOCUMENT = { folderId: "a", path: "plan-a", fileName: "결과.html" };
 
 describe("useViewerStore", () => {
   beforeEach(() => {
-    useViewerStore.setState({ isListOpen: true, isListDismissed: false, selectedDocument: null });
+    useViewerStore.setState({
+      isListOpen: true,
+      isListDismissed: false,
+      selectedDocument: null,
+      favorites: [],
+      listView: "all",
+    });
   });
 
   it("목록은 처음에 열려 있다", () => {
@@ -39,11 +45,11 @@ describe("useViewerStore", () => {
     expect(readSaved().isListOpen).toBe(true);
   });
 
-  it("문서를 고르면 목록이 잠깐 닫히고, 고른 문서만 기기에 기억한다", () => {
+  it("문서를 고르면 목록이 잠깐 닫히고, 잠깐 닫힌 상태는 기기에 기억하지 않는다", () => {
     useViewerStore.getState().selectDocument(DOCUMENT);
 
     expect(useViewerStore.getState().isListDismissed).toBe(true);
-    expect(readSaved()).toEqual({ isListOpen: true, selectedDocument: DOCUMENT });
+    expect(readSaved()).toEqual({ isListOpen: true, selectedDocument: DOCUMENT, favorites: [], listView: "all" });
   });
 
   it("잠깐 닫힌 목록에서 toggleList 를 부르면 다시 연다", () => {
@@ -51,5 +57,38 @@ describe("useViewerStore", () => {
     useViewerStore.getState().toggleList();
 
     expect(useViewerStore.getState()).toMatchObject({ isListOpen: true, isListDismissed: false });
+  });
+
+  it("toggleFavorite 는 켠 순서대로 쌓고, 다시 부르면 뺀다", () => {
+    const folder = { kind: "folder", folderId: "a" } as const;
+    const document = { kind: "document", ...DOCUMENT } as const;
+
+    useViewerStore.getState().toggleFavorite(folder);
+    useViewerStore.getState().toggleFavorite(document);
+    expect(useViewerStore.getState().favorites).toEqual([folder, document]);
+    expect(readSaved().favorites).toEqual([folder, document]);
+
+    useViewerStore.getState().toggleFavorite({ kind: "folder", folderId: "a" });
+    expect(useViewerStore.getState().favorites).toEqual([document]);
+  });
+
+  it("removeFavoritesOfFolder 는 그 등록 폴더와 안쪽 항목의 즐겨찾기만 지운다", () => {
+    const kept = { kind: "folder", folderId: "b" } as const;
+
+    useViewerStore.setState({
+      favorites: [{ kind: "folder", folderId: "a" }, { kind: "document", ...DOCUMENT }, kept],
+    });
+    useViewerStore.getState().removeFavoritesOfFolder("a");
+
+    expect(useViewerStore.getState().favorites).toEqual([kept]);
+  });
+
+  it("toggleListView 로 전체 · 즐겨찾기 보기를 바꾸고 기기에 기억한다", () => {
+    useViewerStore.getState().toggleListView();
+    expect(useViewerStore.getState().listView).toBe("favorites");
+    expect(readSaved().listView).toBe("favorites");
+
+    useViewerStore.getState().toggleListView();
+    expect(useViewerStore.getState().listView).toBe("all");
   });
 });

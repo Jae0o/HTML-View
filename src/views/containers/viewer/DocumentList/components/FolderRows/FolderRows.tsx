@@ -1,12 +1,14 @@
 import { useState } from "react";
 
 import { type RegisteredFolder, useFolderStore } from "@libs/features/folder";
+import { useViewerStore } from "@libs/features/viewer";
 
 import { Button, ConfirmDialog, IconButton, Tooltip } from "@views/components/common";
 import { CloseIcon, FolderIcon } from "@views/components/icons";
 import { TreeRow } from "@views/components/viewer";
 
 import { ROOT_FOLDER_LABEL, ROW_ACTION_REVEAL_CLASS } from "../../DocumentList.constants";
+import { FavoriteButton } from "../FavoriteButton";
 import { HtmlFolderRows } from "../HtmlFolderRows";
 
 interface FolderRowsProps {
@@ -23,6 +25,7 @@ const NO_PATHS: string[] = [];
 const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PATHS }: FolderRowsProps) => {
   const reconnect = useFolderStore(state => state.reconnect);
   const removeFolder = useFolderStore(state => state.removeFolder);
+  const removeFavoritesOfFolder = useViewerStore(state => state.removeFavoritesOfFolder);
 
   // 등록 폴더는 처음에 펼쳐 있다
   const [isExpanded, setIsExpanded] = useState(true);
@@ -31,9 +34,11 @@ const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PAT
   const isConnected = folder.status === "connected";
   const isOpen = isConnected && (forceExpanded || isExpanded);
 
-  const handleRemove = () => {
+  // 등록을 해제하면 그 폴더와 안쪽 항목의 즐겨찾기도 함께 지운다
+  const handleRemove = async () => {
     setIsRemoveOpen(false);
-    void removeFolder(folder.id);
+
+    if (await removeFolder(folder.id)) removeFavoritesOfFolder(folder.id);
   };
 
   return (
@@ -53,6 +58,7 @@ const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PAT
                 다시 연결
               </Button>
             )}
+            <FavoriteButton item={{ kind: "folder", folderId: folder.id }} />
             <Tooltip label="등록 해제">
               <IconButton
                 size="s"
@@ -88,7 +94,7 @@ const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PAT
         open={isRemoveOpen}
         tone="danger"
         title="등록을 해제할까요?"
-        description={`「${folder.name}」 폴더가 목록에서 빠집니다. 파일은 지워지지 않습니다.`}
+        description={`「${folder.name}」 폴더가 목록에서 빠집니다. 파일은 지워지지 않고, 이 폴더의 즐겨찾기는 함께 지워집니다.`}
         confirmLabel="해제"
         onConfirm={handleRemove}
         onCancel={() => setIsRemoveOpen(false)}

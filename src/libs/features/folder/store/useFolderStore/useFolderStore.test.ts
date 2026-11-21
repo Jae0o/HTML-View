@@ -156,8 +156,7 @@ describe("useFolderStore", () => {
       folders: [asFolder("a", fakeHandle("docs"), "connected"), asFolder("b", fakeHandle("notes"), "connected")],
     });
 
-    await useFolderStore.getState().removeFolder("a");
-
+    expect(await useFolderStore.getState().removeFolder("a")).toBe(true);
     expect(deleteFolderRecord).toHaveBeenCalledWith("a");
     expect(useFolderStore.getState().folders.map(folder => folder.id)).toEqual(["b"]);
   });
@@ -166,8 +165,7 @@ describe("useFolderStore", () => {
     useFolderStore.setState({ folders: [asFolder("a", fakeHandle("docs"), "connected")] });
     vi.mocked(deleteFolderRecord).mockRejectedValue(new Error("지우기 실패"));
 
-    await useFolderStore.getState().removeFolder("a");
-
+    expect(await useFolderStore.getState().removeFolder("a")).toBe(false);
     expect(useFolderStore.getState().folders).toHaveLength(1);
     expect(useToastStore.getState().message).toBe(FOLDER_MESSAGE.removeFailed);
   });
