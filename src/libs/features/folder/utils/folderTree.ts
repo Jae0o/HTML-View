@@ -75,3 +75,40 @@ export const filterFolders = (folders: RegisteredFolder[], query: string): Folde
     return htmlFolders.length > 0 ? [{ folder: { ...folder, htmlFolders }, documentMatchedPaths }] : [];
   });
 };
+
+/**
+ * 다시 훑은 결과를 지금 목록에 합친다.
+ * 바뀐 것이 없으면 지금 목록을 그대로 돌려주고(같은 객체), 바뀌었으면 그대로인 문서는 지금 것을 다시 쓴다 —
+ * 열려 있는 문서의 연결(handle)이 바뀌지 않아 문서를 다시 읽지 않는다
+ */
+export const mergeHtmlFolders = (current: HtmlFolder[], scanned: HtmlFolder[]): HtmlFolder[] => {
+  let changed = current.length !== scanned.length;
+
+  const merged = scanned.map((scannedFolder, index) => {
+    const currentFolder = current.find(folder => folder.path === scannedFolder.path);
+    if (!currentFolder) {
+      changed = true;
+      return scannedFolder;
+    }
+
+    const isSame =
+      currentFolder.documents.length === scannedFolder.documents.length &&
+      currentFolder.documents.every((document, at) => document.fileName === scannedFolder.documents[at].fileName);
+
+    if (isSame) {
+      if (current[index] !== currentFolder) changed = true;
+      return currentFolder;
+    }
+
+    changed = true;
+
+    return {
+      path: scannedFolder.path,
+      documents: scannedFolder.documents.map(
+        document => currentFolder.documents.find(existing => existing.fileName === document.fileName) ?? document,
+      ),
+    };
+  });
+
+  return changed ? merged : current;
+};

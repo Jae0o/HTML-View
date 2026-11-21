@@ -7,13 +7,13 @@ import { FOLDER_MESSAGE } from "./useFolderStore.constants";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// 기기 저장 · 폴더 훑기는 브라우저 기능이라 가짜로 바꾼다
-vi.mock("../../utils", () => ({
+// 기기 저장 · 폴더 훑기는 브라우저 기능이라 가짜로 바꾼다. 목록을 합치는 계산(mergeHtmlFolders)은 진짜를 쓴다
+vi.mock("../../utils/folderDb", () => ({
   readFolderRecords: vi.fn(),
   writeFolderRecord: vi.fn(),
   deleteFolderRecord: vi.fn(),
-  scanFolder: vi.fn(),
 }));
+vi.mock("../../utils/scanFolder", () => ({ scanFolder: vi.fn() }));
 
 interface FakeHandle {
   name: string;
@@ -168,5 +168,71 @@ describe("useFolderStore", () => {
     expect(await useFolderStore.getState().removeFolder("a")).toBe(false);
     expect(useFolderStore.getState().folders).toHaveLength(1);
     expect(useToastStore.getState().message).toBe(FOLDER_MESSAGE.removeFailed);
+  });
+
+  it("refreshFolders 는 새로 생긴 문서를 반영하고, 바뀐 것이 없는 폴더는 그대로 둔다", async () => {
+    const changing = asFolder("a", fakeHandle("docs"), "connected");
+    const steady = asFolder("b", fakeHandle("notes"), "connected");
+    const documents = [{ name: "새 문서", fileName: "새 문서.html", handle: {} as FileSystemFileHandle }];
+
+    useFolderStore.setState({ folders: [changing, steady] });
+    vi.mocked(scanFolder).mockImplementation(async handle =>
+      handle === changing.handle ? [{ path: "", documents }] : [],
+    );
+
+    await useFolderStore.getState().refreshFolders();
+
+    const [first, second] = useFolderStore.getState().folders;
+
+    expect(first.htmlFolders).toEqual([{ path: "", documents }]);
+    expect(second).toBe(steady);
+  });
+
+  it("refreshFolders 에서 바뀐 것이 없으면 목록을 건드리지 않는다", async () => {
+    const folders = [asFolder("a", fakeHandle("docs"), "connected")];
+
+    useFolderStore.setState({ folders });
+    await useFolderStore.getState().refreshFolders();
+
+    expect(useFolderStore.getState().folders).toBe(folders);
+  });
+
+  it("refreshFolders 는 권한이 풀린 폴더를 연결 끊김으로 바꾸고, 이미 끊긴 폴더는 건너뛴다", async () => {
+    useFolderStore.setState({
+      folders: [
+        asFolder("a", fakeHandle("docs", "prompt"), "connected"),
+        asFolder("b", fakeHandle("lost"), "disconnected"),
+      ],
+    });
+
+    await useFolderStore.getState().refreshFolders();
+
+    expect(useFolderStore.getState().folders.map(folder => folder.status)).toEqual(["disconnected", "disconnected"]);
+    expect(scanFolder).not.toHaveBeenCalled();
+  });
+
+  it("refreshFolders 는 훑다가 오류가 나면 그 폴더를 그대로 둔다", async () => {
+    const folders = [asFolder("a", fakeHandle("docs"), "connected")];
+    useFolderStore.setState({ folders });
+    vi.mocked(scanFolder).mockRejectedValue(new Error("읽는 중 사라짐"));
+
+    await useFolderStore.getState().refreshFolders();
+
+    expect(useFolderStore.getState().folders).toBe(folders);
+  });
+
+  it("refreshFolders 는 훑는 동안 바뀐 폴더를 옛 결과로 덮지 않는다", async () => {
+    const handle = fakeHandle("docs");
+    const replaced = asFolder("a", handle, "connected");
+    useFolderStore.setState({ folders: [asFolder("a", handle, "connected")] });
+    vi.mocked(scanFolder).mockImplementation(async () => {
+      useFolderStore.setState({ folders: [replaced] });
+
+      return [{ path: "", documents: [{ name: "신규", fileName: "신규.html", handle: {} as FileSystemFileHandle }] }];
+    });
+
+    await useFolderStore.getState().refreshFolders();
+
+    expect(useFolderStore.getState().folders[0]).toBe(replaced);
   });
 });

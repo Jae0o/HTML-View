@@ -12,6 +12,8 @@ export interface FolderState {
   reconnect: (id: string) => Promise<void>;
   /** 등록을 해제한다 — 기기에 저장한 연결을 지우고 목록에서 뺀다. 폴더의 파일은 건드리지 않는다. 해제했으면 true */
   removeFolder: (id: string) => Promise<boolean>;
+  /** 연결된 폴더를 모두 다시 훑어 새로 생기거나 사라진 문서를 반영한다. 연결 끊긴 폴더는 건너뛴다 */
+  refreshFolders: () => Promise<void>;
   /** 폴더 하나를 다시 훑는다. 읽기 권한이 풀렸으면 연결 끊김으로 바꾼다 (권한을 다시 묻지는 않는다) */
   refreshFolder: (id: string) => Promise<void>;
 }

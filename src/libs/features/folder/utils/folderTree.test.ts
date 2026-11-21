@@ -1,5 +1,12 @@
-import type { RegisteredFolder } from "../types";
-import { filterFolders, findDocument, groupHtmlFiles, isExcludedDirectory, isHtmlFile } from "./folderTree";
+import type { HtmlFolder, RegisteredFolder } from "../types";
+import {
+  filterFolders,
+  findDocument,
+  groupHtmlFiles,
+  isExcludedDirectory,
+  isHtmlFile,
+  mergeHtmlFolders,
+} from "./folderTree";
 
 import { describe, expect, it } from "vitest";
 
@@ -148,5 +155,38 @@ describe("filterFolders", () => {
 
   it("맞는 것이 없으면 빈 목록이다", () => {
     expect(filterFolders(folders, "없는 이름")).toEqual([]);
+  });
+});
+
+describe("mergeHtmlFolders", () => {
+  const entry = (fileName: string, handle: string) => ({ name: fileName.replace(".html", ""), fileName, handle });
+  const asFolders = (folders: unknown) => folders as HtmlFolder[];
+
+  const current = asFolders([{ path: "plan-a", documents: [entry("결과.html", "지금 연결")] }]);
+
+  it("바뀐 것이 없으면 지금 목록을 그대로(같은 객체) 돌려준다", () => {
+    const scanned = asFolders([{ path: "plan-a", documents: [entry("결과.html", "새 연결")] }]);
+
+    expect(mergeHtmlFolders(current, scanned)).toBe(current);
+  });
+
+  it("문서가 늘면 반영하되, 그대로인 문서는 지금 연결을 다시 쓴다", () => {
+    const scanned = asFolders([
+      { path: "plan-a", documents: [entry("결과.html", "새 연결"), entry("추가.html", "새 연결")] },
+    ]);
+
+    const merged = mergeHtmlFolders(current, scanned);
+
+    expect(merged).not.toBe(current);
+    expect(merged[0].documents.map(document => document.handle)).toEqual(["지금 연결", "새 연결"]);
+  });
+
+  it("폴더가 생기거나 사라지면 반영하고, 그대로인 폴더는 지금 것을 다시 쓴다", () => {
+    const added = asFolders([...current, { path: "plan-b", documents: [entry("새 문서.html", "새 연결")] }]);
+    const merged = mergeHtmlFolders(current, added);
+
+    expect(merged.map(folder => folder.path)).toEqual(["plan-a", "plan-b"]);
+    expect(merged[0]).toBe(current[0]);
+    expect(mergeHtmlFolders(current, [])).toEqual([]);
   });
 });
