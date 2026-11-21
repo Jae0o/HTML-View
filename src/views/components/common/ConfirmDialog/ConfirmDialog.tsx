@@ -41,7 +41,8 @@ const ConfirmDialog = ({
       aria-labelledby={titleId}
       aria-describedby={descriptionId}
       onCancel={handleCancel}
-      className="m-auto w-[36rem] max-w-[calc(100vw-3.2rem)] rounded-12 bg-surface-default p-24 text-text-primary shadow-float backdrop:bg-bg-overlay"
+      // 열 때 · 닫을 때 창과 덮개가 함께 흐려진다. 닫힌 뒤에도 사라짐이 끝날 때까지 맨 위 층에 남긴다(display · overlay 전환)
+      className="m-auto w-[36rem] max-w-[calc(100vw-3.2rem)] rounded-12 bg-surface-default p-24 text-text-primary opacity-0 shadow-float transition-[opacity,display,overlay] transition-discrete duration-200 backdrop:bg-bg-overlay backdrop:opacity-0 backdrop:transition-[opacity,display,overlay] backdrop:transition-discrete backdrop:duration-200 open:opacity-100 open:backdrop:opacity-100 starting:open:opacity-0 starting:open:backdrop:opacity-0"
     >
       <div className="flex flex-col gap-24">
         <div className="flex flex-col gap-8">
