@@ -7,7 +7,7 @@ import clsx from "clsx";
 const SearchInput = ({ className, ref, ...rest }: SearchInputProps) => (
   <label
     className={clsx(
-      "flex h-32 min-w-0 items-center gap-6 rounded-6 border border-border-default bg-surface-default px-10 text-text-tertiary focus-within:border-text-primary",
+      "flex h-32 min-w-0 items-center gap-6 rounded-6 border border-border-default bg-surface-default px-10 text-text-tertiary transition-colors focus-within:border-text-primary",
       className,
     )}
   >

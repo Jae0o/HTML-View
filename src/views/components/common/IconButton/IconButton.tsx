@@ -31,7 +31,7 @@ const IconButton = ({
       type={type ?? "button"}
       aria-pressed={pressed}
       className={clsx(
-        "inline-flex shrink-0 cursor-pointer items-center justify-center rounded-6",
+        "inline-flex shrink-0 cursor-pointer items-center justify-center rounded-6 transition-colors",
         size === "m" && "size-32 border",
         size === "m" && !isOn && "text-text-secondary hover:bg-brand-bg-subtle hover:text-text-brand",
         size === "m" && !isOn && variant === "outline" && "border-border-default bg-surface-default",

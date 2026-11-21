@@ -30,7 +30,7 @@ const Button = ({ variant = "default", icon, children, className, type, ...rest 
     {...rest}
     type={type ?? "button"}
     className={clsx(
-      "inline-flex cursor-pointer items-center gap-6 rounded-6 border whitespace-nowrap",
+      "inline-flex cursor-pointer items-center gap-6 rounded-6 border whitespace-nowrap transition-colors",
       VARIANT_CLASS[variant],
       className,
     )}
