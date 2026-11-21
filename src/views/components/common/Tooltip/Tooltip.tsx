@@ -15,16 +15,18 @@ import clsx from "clsx";
  */
 const Tooltip = ({ label, placement = "bottom", children }: TooltipProps) => {
   const ref = useRef<HTMLSpanElement>(null);
+  // 사라지는 동안에도 자리를 그대로 두어야 한다 — 열림만 끄고, 자리는 사라짐이 끝나면 비운다
   const [position, setPosition] = useState<TooltipPosition | null>(null);
-  const visible = position !== null;
+  const [visible, setVisible] = useState(false);
 
-  const close = useCallback(() => setPosition(null), []);
+  const close = useCallback(() => setVisible(false), []);
 
   const show = () => {
     const element = ref.current;
     if (!element) return;
 
     setPosition(calcTooltipPosition(element.getBoundingClientRect(), placement));
+    setVisible(true);
   };
 
   const handleFocus = (e: FocusEvent<HTMLSpanElement>) => {
@@ -63,11 +65,15 @@ const Tooltip = ({ label, placement = "bottom", children }: TooltipProps) => {
           <span
             aria-hidden="true"
             className={clsx(
-              "pointer-events-none fixed z-9999 -translate-x-1/2 rounded-6 bg-bg-inverse px-8 py-4 text-sm whitespace-nowrap text-text-inverse",
+              "pointer-events-none fixed z-9999 -translate-x-1/2 rounded-6 bg-bg-inverse px-8 py-4 text-sm whitespace-nowrap text-text-inverse transition-opacity starting:opacity-0",
               placement === "top" && "-translate-y-full",
+              !visible && "opacity-0",
             )}
             // 자리는 그릴 때 잰 값이라 클래스로 적을 수 없다. 화면에서 잰 px 를 그대로 넣는다
             style={{ top: `${position.top}px`, left: `${position.left}px` }}
+            onTransitionEnd={() => {
+              if (!visible) setPosition(null);
+            }}
           >
             {label}
           </span>,
