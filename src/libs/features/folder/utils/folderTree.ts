@@ -1,4 +1,4 @@
-import type { DocumentEntry, DocumentLocation, HtmlFolder, RegisteredFolder, ScannedFile } from "../types";
+import type { DocumentEntry, DocumentLocation, FolderMatch, HtmlFolder, RegisteredFolder, ScannedFile } from "../types";
 
 /** 경로를 이어 붙이는 글자 — 플랜명 / completed */
 const PATH_SEPARATOR = " / ";
@@ -44,3 +44,34 @@ export const findDocument = (
     .find(folder => folder.id === folderId)
     ?.htmlFolders.find(htmlFolder => htmlFolder.path === path)
     ?.documents.find(document => document.fileName === fileName);
+
+/**
+ * 검색에서 견줄 글자로 바꾼다 — 대소문자를 가리지 않고, 한글 자모가 풀려 저장된 이름(macOS 파일 이름)도 합친 글자로 맞춘다
+ */
+export const toSearchText = (text: string): string => text.normalize("NFC").toLowerCase();
+
+/**
+ * 검색어로 목록을 거른다 (대소문자를 가리지 않는다). 위에서부터 먼저 맞는 것:
+ * 등록 폴더 이름이 맞으면 그 폴더를 통째로 → 경로가 맞는 HTML 폴더는 통째로 → 문서 이름이 맞으면 그 문서만 남긴 HTML 폴더
+ */
+export const filterFolders = (folders: RegisteredFolder[], query: string): FolderMatch[] => {
+  const keyword = toSearchText(query.trim());
+
+  return folders.flatMap((folder): FolderMatch[] => {
+    if (!keyword || toSearchText(folder.name).includes(keyword)) return [{ folder, documentMatchedPaths: [] }];
+
+    const documentMatchedPaths: string[] = [];
+    const htmlFolders = folder.htmlFolders.flatMap(htmlFolder => {
+      if (toSearchText(htmlFolder.path).includes(keyword)) return [htmlFolder];
+
+      const documents = htmlFolder.documents.filter(document => toSearchText(document.name).includes(keyword));
+      if (documents.length === 0) return [];
+
+      documentMatchedPaths.push(htmlFolder.path);
+
+      return [{ ...htmlFolder, documents }];
+    });
+
+    return htmlFolders.length > 0 ? [{ folder: { ...folder, htmlFolders }, documentMatchedPaths }] : [];
+  });
+};

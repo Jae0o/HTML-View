@@ -13,10 +13,12 @@ interface HtmlFolderRowsProps {
   htmlFolder: HtmlFolder;
   /** 줄 이름 */
   label: string;
+  /** 검색에서 문서 이름이 맞은 폴더 — 접혀 있어도 펼쳐서 맞은 문서를 보여 준다. 그동안은 줄을 눌러도 접히지 않는다 */
+  forceExpanded?: boolean;
 }
 
 /** HTML 폴더 한 줄과 그 안의 문서 줄들 */
-const HtmlFolderRows = ({ folderId, htmlFolder, label }: HtmlFolderRowsProps) => {
+const HtmlFolderRows = ({ folderId, htmlFolder, label, forceExpanded = false }: HtmlFolderRowsProps) => {
   // 처음에는 접혀 있다. 다시 들어왔을 때 보던 문서의 줄이 보이도록, 그 문서가 든 폴더만 펼친 채로 시작한다
   const [isExpanded, setIsExpanded] = useState(() => {
     const { selectedDocument } = useViewerStore.getState();
@@ -24,17 +26,19 @@ const HtmlFolderRows = ({ folderId, htmlFolder, label }: HtmlFolderRowsProps) =>
     return selectedDocument?.folderId === folderId && selectedDocument.path === htmlFolder.path;
   });
 
+  const isOpen = forceExpanded || isExpanded;
+
   return (
     <>
       <TreeRow
         depth={1}
         label={label}
-        expanded={isExpanded}
+        expanded={isOpen}
         trailing={<Tag>{htmlFolder.documents.length}</Tag>}
-        onClick={() => setIsExpanded(previous => !previous)}
+        onClick={forceExpanded ? undefined : () => setIsExpanded(previous => !previous)}
       />
 
-      {isExpanded &&
+      {isOpen &&
         htmlFolder.documents.map(document => (
           <DocumentRow
             key={document.fileName}

@@ -1,7 +1,9 @@
-import { findDocument, isFolderPickerSupported, useFolderStore } from "@libs/features/folder";
+import { useState } from "react";
+
+import { filterFolders, findDocument, isFolderPickerSupported, useFolderStore } from "@libs/features/folder";
 import { useViewerStore } from "@libs/features/viewer";
 
-import { FloatingSurface, IconButton, Tooltip } from "@views/components/common";
+import { FloatingSurface, IconButton, SearchInput, Tooltip } from "@views/components/common";
 import { FolderPlusIcon, MenuIcon } from "@views/components/icons";
 import { SectionHeader } from "@views/components/viewer";
 
@@ -28,6 +30,11 @@ const DocumentList = () => {
   // 고른 문서를 찾을 수 있을 때만 목록 밖을 누르면 닫는다 — 빈 화면 · 문서를 찾지 못한 화면에서는 닫지 않는다
   const markInside = useClickAway(isListVisible && isDocumentShown, dismissList);
 
+  // 검색어는 기억하지 않는다 — 입력하는 대로 목록을 거른다
+  const [query, setQuery] = useState("");
+  const isSearching = query.trim() !== "";
+  const matches = filterFolders(folders, query);
+
   // 폴더를 열 수 없는 브라우저에서는 목록도 열기 버튼도 두지 않는다.
   // 저장된 폴더를 불러오기 전에도 그리지 않는다 — 빈 목록이 잠깐 비치거나, 불러오는 중에 폴더를 추가하는 일을 막는다
   if (!isFolderPickerSupported() || !isRestored) return null;
@@ -53,6 +60,24 @@ const DocumentList = () => {
         onPointerDown={markInside}
         className={isListVisible ? SURFACE_CLASS : SURFACE_HIDDEN_CLASS}
       >
+        <div className="flex items-center gap-8">
+          <SearchInput
+            aria-label="폴더 · 문서 검색"
+            placeholder="폴더 · 문서 검색"
+            value={query}
+            onChange={event => setQuery(event.target.value)}
+            className="flex-1"
+          />
+          <Tooltip label="목록 접기">
+            <IconButton
+              variant="ghost"
+              aria-label="목록 접기"
+              icon={<MenuIcon />}
+              onClick={toggleList}
+            />
+          </Tooltip>
+        </div>
+
         <SectionHeader
           title="등록 폴더"
           action={
@@ -65,25 +90,20 @@ const DocumentList = () => {
               />
             </Tooltip>
           }
-          trailing={
-            <Tooltip label="목록 접기">
-              <IconButton
-                variant="ghost"
-                aria-label="목록 접기"
-                icon={<MenuIcon />}
-                onClick={toggleList}
-              />
-            </Tooltip>
-          }
         />
 
         <div className="flex min-h-0 flex-col overflow-y-auto">
-          {folders.map(folder => (
+          {matches.map(({ folder, documentMatchedPaths }) => (
             <FolderRows
               key={folder.id}
               folder={folder}
+              forceExpanded={isSearching}
+              forceExpandedPaths={documentMatchedPaths}
             />
           ))}
+          {isSearching && matches.length === 0 && (
+            <p className="m-0 flex h-32 items-center pl-8 text-sm text-text-tertiary">검색 결과가 없습니다.</p>
+          )}
         </div>
       </FloatingSurface>
     </>

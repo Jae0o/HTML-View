@@ -1,5 +1,5 @@
 import { IconButton } from "@views/components/common";
-import { FolderPlusIcon, MenuIcon } from "@views/components/icons";
+import { FolderPlusIcon } from "@views/components/icons";
 
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
@@ -24,21 +24,14 @@ type Story = StoryObj<typeof meta>;
 
 export const TitleOnly: Story = {};
 
-/** 제목 옆 폴더 추가 · 오른쪽 끝 접기 */
-export const WithButtons: Story = {
+/** 제목 옆 폴더 추가 */
+export const WithAction: Story = {
   args: {
     action: (
       <IconButton
         size="s"
         aria-label="폴더 추가"
         icon={<FolderPlusIcon />}
-      />
-    ),
-    trailing: (
-      <IconButton
-        variant="ghost"
-        aria-label="목록 접기"
-        icon={<MenuIcon />}
       />
     ),
   },

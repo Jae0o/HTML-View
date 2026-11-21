@@ -11,10 +11,16 @@ import { HtmlFolderRows } from "../HtmlFolderRows";
 
 interface FolderRowsProps {
   folder: RegisteredFolder;
+  /** 검색 중 — 접어 둔 폴더도 펼쳐서 보여 준다. 그동안은 줄을 눌러도 접히지 않는다 */
+  forceExpanded?: boolean;
+  /** 검색에서 문서 이름이 맞은 HTML 폴더의 경로 — 그 폴더는 펼쳐서 보여 준다 */
+  forceExpandedPaths?: string[];
 }
 
+const NO_PATHS: string[] = [];
+
 /** 등록 폴더 한 줄과 그 안의 HTML 폴더 줄들. 등록 해제 확인 창도 여기서 띄운다 */
-const FolderRows = ({ folder }: FolderRowsProps) => {
+const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PATHS }: FolderRowsProps) => {
   const reconnect = useFolderStore(state => state.reconnect);
   const removeFolder = useFolderStore(state => state.removeFolder);
 
@@ -23,7 +29,7 @@ const FolderRows = ({ folder }: FolderRowsProps) => {
   const [isRemoveOpen, setIsRemoveOpen] = useState(false);
 
   const isConnected = folder.status === "connected";
-  const isOpen = isConnected && isExpanded;
+  const isOpen = isConnected && (forceExpanded || isExpanded);
 
   const handleRemove = () => {
     setIsRemoveOpen(false);
@@ -36,7 +42,7 @@ const FolderRows = ({ folder }: FolderRowsProps) => {
         depth={0}
         label={folder.name}
         icon={<FolderIcon className={isConnected ? "shrink-0 text-brand-bg" : "shrink-0 text-text-tertiary"} />}
-        expanded={isConnected ? isExpanded : undefined}
+        expanded={isConnected ? isOpen : undefined}
         actions={
           <>
             {!isConnected && (
@@ -58,7 +64,7 @@ const FolderRows = ({ folder }: FolderRowsProps) => {
             </Tooltip>
           </>
         }
-        onClick={isConnected ? () => setIsExpanded(previous => !previous) : undefined}
+        onClick={isConnected && !forceExpanded ? () => setIsExpanded(previous => !previous) : undefined}
       />
 
       {isOpen && folder.htmlFolders.length === 0 && (
@@ -73,6 +79,7 @@ const FolderRows = ({ folder }: FolderRowsProps) => {
             folderId={folder.id}
             htmlFolder={htmlFolder}
             label={htmlFolder.path || ROOT_FOLDER_LABEL}
+            forceExpanded={forceExpandedPaths.includes(htmlFolder.path)}
           />
         ))}
       </div>

@@ -51,3 +51,11 @@ export interface FolderRecord {
   /** 등록한 때 (목록 순서) */
   addedAt: number;
 }
+
+/** 검색에 맞은 등록 폴더 한 개 */
+export interface FolderMatch {
+  /** 맞은 HTML 폴더 · 문서만 남긴 등록 폴더 */
+  folder: RegisteredFolder;
+  /** 문서 이름이 맞아서 남은 HTML 폴더의 경로 — 맞은 문서가 보이도록 펼쳐서 보여 준다 */
+  documentMatchedPaths: string[];
+}
