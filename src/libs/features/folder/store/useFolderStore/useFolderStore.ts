@@ -44,7 +44,7 @@ const rescanFolder = async (folder: RegisteredFolder): Promise<RegisteredFolder>
   }
 };
 
-// 다시 훑기가 겹치지 않게 한다 — 폴더가 커서 한 번이 10초를 넘겨도 다음 차례는 건너뛴다
+// 다시 훑기가 겹치지 않게 한다 — 폴더가 커서 한 번이 5초를 넘겨도 다음 차례는 건너뛴다
 let isRefreshing = false;
 
 // 불러오기는 한 번만 한다 — 두 번 돌면 늦게 끝난 쪽이 그사이 추가한 폴더를 덮어쓴다 (개발 모드는 effect 를 두 번 부른다)
