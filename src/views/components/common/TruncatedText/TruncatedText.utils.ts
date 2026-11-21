@@ -7,8 +7,8 @@ const INSET_X = 7;
 /** 상자 테두리 1 + 위 여백 1 (px) */
 const INSET_Y = 2;
 
-/** 펼친 상자 최소 폭(px) */
-const MIN_WIDTH = 320;
+/** 펼친 상자 최소 폭(px) — 칸 폭으로만 펼칠 때(fitCell)는 0 을 넘긴다 */
+export const POP_MIN_WIDTH = 320;
 
 export interface TextRect {
   top: number;
@@ -27,7 +27,7 @@ export interface PopBox {
  * 펼친 상자의 자리 · 폭(px). 첫 줄이 보이던 글자와 같은 자리에 오게 한다.
  * 가로로 옮기지 않는다 — 화면 오른쪽 끝에서는 폭만 줄여 그 안에서 줄바꿈한다(칸 폭 아래로는 안 줄임).
  */
-export const calcPopBox = (rect: TextRect, viewportWidth: number): PopBox => {
+export const calcPopBox = (rect: TextRect, viewportWidth: number, minWidth: number = POP_MIN_WIDTH): PopBox => {
   const left = rect.left - INSET_X;
   const cellWidth = rect.width + INSET_X * 2;
   const roomToEdge = viewportWidth - EDGE_MARGIN - left;
@@ -35,7 +35,7 @@ export const calcPopBox = (rect: TextRect, viewportWidth: number): PopBox => {
   return {
     top: rect.top - INSET_Y,
     left,
-    width: Math.min(Math.max(cellWidth, MIN_WIDTH), Math.max(cellWidth, roomToEdge)),
+    width: Math.min(Math.max(cellWidth, minWidth), Math.max(cellWidth, roomToEdge)),
   };
 };
 

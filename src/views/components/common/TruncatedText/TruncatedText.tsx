@@ -13,7 +13,7 @@ import { createPortal } from "react-dom";
 import { useEscClose } from "@libs/hooks/common";
 
 import type { TruncatedTextProps } from "./TruncatedText.types";
-import { calcPopBox, calcPopTop } from "./TruncatedText.utils";
+import { POP_MIN_WIDTH, calcPopBox, calcPopTop } from "./TruncatedText.utils";
 import { useTextTruncated } from "./hooks";
 
 import clsx from "clsx";
@@ -40,9 +40,15 @@ const findBackground = (element: HTMLElement): string => {
   return getComputedStyle(document.body).backgroundColor;
 };
 
-/** 말줄임 펼침 — 한 줄로 잘린 글자를 잘렸을 때만 그 자리에서 펼친다 (디자인 시스템 「말줄임 펼침」) */
-const TruncatedText = ({ text, className }: TruncatedTextProps) => {
-  const { ref, isTruncated } = useTextTruncated(text);
+// 정한 줄 수만큼 보이고 넘치면 끝을 줄인다. 여러 줄은 긴 영문 이름도 칸 안에서 끊는다
+const LINES_CLASS = {
+  1: "block truncate",
+  2: "line-clamp-2 wrap-anywhere",
+} as const;
+
+/** 말줄임 펼침 — 정한 줄 수로 잘린 글자를 잘렸을 때만 그 자리에서 펼친다 (디자인 시스템 「말줄임 펼침」) */
+const TruncatedText = ({ text, lines = 1, fitCell = false, className }: TruncatedTextProps) => {
+  const { ref, isTruncated } = useTextTruncated(text, lines);
   const popRef = useRef<HTMLSpanElement>(null);
   const popId = useId();
   // 사라지는 동안에도 자리를 그대로 두어야 한다 — 열림만 끄고, 자리는 사라짐이 끝나면 비운다
@@ -64,7 +70,7 @@ const TruncatedText = ({ text, className }: TruncatedTextProps) => {
 
     setPop({
       // 화면 폭은 세로 스크롤바를 뺀 값이어야 상자 끝이 스크롤바 밑에 가려지지 않는다
-      ...calcPopBox(rect, document.documentElement.clientWidth),
+      ...calcPopBox(rect, document.documentElement.clientWidth, fitCell ? 0 : POP_MIN_WIDTH),
       textBottom: rect.bottom,
       look: {
         font: style.font,
@@ -117,7 +123,7 @@ const TruncatedText = ({ text, className }: TruncatedTextProps) => {
     >
       <span
         ref={ref}
-        className="block truncate"
+        className={LINES_CLASS[lines]}
       >
         {text}
       </span>
@@ -131,7 +137,9 @@ const TruncatedText = ({ text, className }: TruncatedTextProps) => {
             role="tooltip"
             className={clsx(
               "fixed z-9999 rounded-6 border border-border-default px-6 pt-[0.1rem] pb-4 wrap-anywhere shadow-float transition-opacity starting:opacity-0",
-              !open && "pointer-events-none opacity-0",
+              // 칸 폭으로 펼친 상자는 마우스를 받지 않는다 — 아래 버튼 · 줄이 그대로 눌린다
+              (fitCell || !open) && "pointer-events-none",
+              !open && "opacity-0",
             )}
             // 자리 · 폭과 쓰는 자리의 글자 모양은 그릴 때 잰 값이라 클래스로 적을 수 없다. 화면에서 잰 px 를 그대로 넣는다 (rem 으로 바꾸면 브라우저 글자 크기 설정에 따라 어긋난다)
             style={{

@@ -23,6 +23,10 @@ describe("calcPopBox", () => {
   it("남은 폭이 칸 폭 + 14px 보다 좁아도 그 아래로는 줄이지 않는다", () => {
     expect(calcPopBox({ top: 100, left: 1050, width: 200, bottom: 120 }, 1200).width).toBe(214);
   });
+
+  it("최소 폭을 0 으로 넘기면(목록 줄) 좁은 칸도 칸 폭 + 좌우 7px 이다", () => {
+    expect(calcPopBox({ top: 100, left: 50, width: 200, bottom: 120 }, 1200, 0).width).toBe(214);
+  });
 });
 
 describe("calcPopTop", () => {

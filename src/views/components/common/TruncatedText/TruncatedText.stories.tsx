@@ -44,3 +44,32 @@ export const FollowsPlace: Story = {
     </div>
   ),
 };
+
+/** 두 줄까지 보이고, 넘치면 둘째 줄 끝을 줄인다 — 마우스를 올리면 펼쳐진다 */
+export const TwoLines: Story = {
+  args: { lines: 2, text: `${LONG} / completed / 구현 결과 보고` },
+  render: args => (
+    <div className="w-[22rem]">
+      <TruncatedText {...args} />
+    </div>
+  ),
+};
+
+/** 목록 줄처럼 누를 것이 붙은 칸 — 펼친 상자가 칸 폭으로만 펼쳐지고 마우스를 받지 않는다 (오른쪽 버튼이 그대로 눌린다) */
+export const FitCell: Story = {
+  args: { lines: 2, fitCell: true, text: `${LONG} / completed / 구현 결과 보고` },
+  render: args => (
+    <div className="flex w-[22rem] items-start gap-8">
+      <TruncatedText
+        {...args}
+        className="flex-1"
+      />
+      <button
+        type="button"
+        className="shrink-0 cursor-pointer text-sm text-text-brand"
+      >
+        버튼
+      </button>
+    </div>
+  ),
+};
