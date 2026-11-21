@@ -1,4 +1,4 @@
-import { ViewerBody } from "@views/containers/viewer";
+import { DocumentList, ViewerBody } from "@views/containers/viewer";
 import { ViewerLayout } from "@views/layouts";
 
 import { useRestoreFolders } from "./hooks";
@@ -8,7 +8,7 @@ const ViewerPage = () => {
   useRestoreFolders();
 
   return (
-    <ViewerLayout>
+    <ViewerLayout floating={<DocumentList />}>
       <ViewerBody />
     </ViewerLayout>
   );

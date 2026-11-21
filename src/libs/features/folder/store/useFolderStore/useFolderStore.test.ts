@@ -110,4 +110,22 @@ describe("useFolderStore", () => {
     expect(useFolderStore.getState().folders).toEqual([]);
     expect(useToastStore.getState().message).toBeNull();
   });
+
+  it("reconnect 는 읽기 권한을 받으면 다시 훑어 연결됨으로 바꾼다", async () => {
+    useFolderStore.setState({ folders: [asFolder("a", fakeHandle("docs", "granted"), "disconnected")] });
+
+    await useFolderStore.getState().reconnect("a");
+
+    expect(useFolderStore.getState().folders[0].status).toBe("connected");
+    expect(scanFolder).toHaveBeenCalledTimes(1);
+  });
+
+  it("reconnect 에서 권한을 거절하면 연결 끊김 그대로 둔다", async () => {
+    useFolderStore.setState({ folders: [asFolder("a", fakeHandle("docs", "denied"), "disconnected")] });
+
+    await useFolderStore.getState().reconnect("a");
+
+    expect(useFolderStore.getState().folders[0].status).toBe("disconnected");
+    expect(scanFolder).not.toHaveBeenCalled();
+  });
 });

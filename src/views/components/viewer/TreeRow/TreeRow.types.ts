@@ -1,0 +1,19 @@
+import type { ReactNode } from "react";
+
+/** 들여쓰기 단 — 0 등록 폴더 · 1 HTML 폴더 · 2 문서 */
+export type TreeRowDepth = 0 | 1 | 2;
+
+export interface TreeRowProps {
+  depth: TreeRowDepth;
+  /** 이름 앞 아이콘 */
+  icon?: ReactNode;
+  label: string;
+  /** 펼칠 수 있는 줄일 때만 넘긴다 — 화살표가 붙는다 */
+  expanded?: boolean;
+  /** 이름 뒤에 붙는 표시 (개수 꼬리표). 누를 수 없다 — 이 자리를 눌러도 줄이 눌린다 */
+  trailing?: ReactNode;
+  /** 줄 오른쪽 끝의 버튼. 줄과 따로 눌린다 */
+  actions?: ReactNode;
+  /** 줄을 눌렀을 때. 없으면 누를 수 없는 줄이다 */
+  onClick?: () => void;
+}

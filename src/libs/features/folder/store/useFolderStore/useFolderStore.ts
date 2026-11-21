@@ -72,6 +72,26 @@ const useFolderStore = create<FolderState>((set, get) => ({
       useToastStore.getState().show(FOLDER_MESSAGE.addFailed);
     }
   },
+
+  reconnect: async id => {
+    const target = get().folders.find(folder => folder.id === id);
+    if (!target) return;
+
+    try {
+      // 권한 요청을 거절하면 그대로 둔다
+      if ((await target.handle.requestPermission({ mode: "read" })) !== "granted") return;
+
+      const htmlFolders = await scanFolder(target.handle);
+
+      set(state => ({
+        folders: state.folders.map(folder =>
+          folder.id === id ? { ...folder, status: "connected", htmlFolders } : folder,
+        ),
+      }));
+    } catch {
+      useToastStore.getState().show(FOLDER_MESSAGE.reconnectFailed);
+    }
+  },
 }));
 
 export default useFolderStore;
