@@ -24,7 +24,7 @@ const meta: Meta<typeof FolderRows> = {
   args: { folder: FOLDER },
   decorators: [
     Story => (
-      <div className="w-[33.6rem]">
+      <div className="w-[45.6rem]">
         <Story />
       </div>
     ),

@@ -15,7 +15,7 @@ const meta: Meta<typeof HtmlFolderRows> = {
   args: { folderId: "sample", htmlFolder: HTML_FOLDER, label: HTML_FOLDER.path },
   decorators: [
     Story => (
-      <div className="w-[33.6rem]">
+      <div className="w-[45.6rem]">
         <Story />
       </div>
     ),

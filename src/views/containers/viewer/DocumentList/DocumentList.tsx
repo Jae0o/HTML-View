@@ -12,7 +12,7 @@ import { DocumentRow, FolderRows, HtmlFolderRows } from "./components";
 import { useClickAway } from "./hooks";
 
 // 목록 상자 — 닫혀 있을 때는 그리지 않고 감추기만 한다(줄의 펼침 상태가 남는다)
-const SURFACE_CLASS = "absolute top-12 left-16 z-400 flex max-h-[calc(100vh-2.4rem)] w-[36rem] flex-col gap-8 p-12";
+const SURFACE_CLASS = "absolute top-12 left-16 z-400 flex max-h-[calc(100vh-2.4rem)] w-[48rem] flex-col gap-8 p-12";
 const SURFACE_HIDDEN_CLASS = "hidden";
 
 /** 문서 목록 — 본문 위 왼쪽에 떠 있다. 접거나 문서를 고르면 열기 버튼만 남는다 */

@@ -11,7 +11,7 @@ const meta: Meta<typeof SectionHeader> = {
   args: { title: "등록 폴더" },
   decorators: [
     Story => (
-      <div className="w-[33.6rem]">
+      <div className="w-[45.6rem]">
         <Story />
       </div>
     ),

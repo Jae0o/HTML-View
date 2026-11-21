@@ -15,7 +15,7 @@ const meta: Meta<typeof DocumentRow> = {
   },
   decorators: [
     Story => (
-      <div className="w-[33.6rem]">
+      <div className="w-[45.6rem]">
         <Story />
       </div>
     ),
