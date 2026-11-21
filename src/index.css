@@ -50,6 +50,10 @@
   --text-logo: 1.6rem;
   --text-logo--line-height: 2rem;
 
+  /* 글자 간격 — 로고 글자만 (프로토타입 값). 다른 곳에는 쓰지 않는다 */
+  --tracking-*: initial;
+  --tracking-logo: -0.02em;
+
   --font-sans:
     "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI",
     "Malgun Gothic", sans-serif;
