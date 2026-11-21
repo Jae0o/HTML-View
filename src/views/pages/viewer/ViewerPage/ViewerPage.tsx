@@ -1,6 +1,17 @@
+import { ViewerBody } from "@views/containers/viewer";
 import { ViewerLayout } from "@views/layouts";
 
-/** 뷰어 화면 — 본문은 F-02 부터 채운다 */
-const ViewerPage = () => <ViewerLayout>{null}</ViewerLayout>;
+import { useRestoreFolders } from "./hooks";
+
+/** 뷰어 화면 */
+const ViewerPage = () => {
+  useRestoreFolders();
+
+  return (
+    <ViewerLayout>
+      <ViewerBody />
+    </ViewerLayout>
+  );
+};
 
 export default ViewerPage;
