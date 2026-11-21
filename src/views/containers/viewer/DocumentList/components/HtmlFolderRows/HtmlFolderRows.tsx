@@ -6,6 +6,7 @@ import { useViewerStore } from "@libs/features/viewer";
 import { Tag } from "@views/components/common";
 import { TreeRow } from "@views/components/viewer";
 
+import { Collapse } from "../Collapse";
 import { DocumentRow } from "../DocumentRow";
 import { FavoriteButton } from "../FavoriteButton";
 
@@ -45,8 +46,8 @@ const HtmlFolderRows = ({ folderId, htmlFolder, label, depth = 1, forceExpanded 
         onClick={forceExpanded ? undefined : () => setIsExpanded(previous => !previous)}
       />
 
-      {isOpen &&
-        htmlFolder.documents.map(document => (
+      <Collapse open={isOpen}>
+        {htmlFolder.documents.map(document => (
           <DocumentRow
             key={document.fileName}
             folderId={folderId}
@@ -55,6 +56,7 @@ const HtmlFolderRows = ({ folderId, htmlFolder, label, depth = 1, forceExpanded 
             depth={DOCUMENT_DEPTH[depth]}
           />
         ))}
+      </Collapse>
     </>
   );
 };

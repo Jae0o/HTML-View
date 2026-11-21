@@ -8,6 +8,7 @@ import { CloseIcon, FolderIcon } from "@views/components/icons";
 import { TreeRow } from "@views/components/viewer";
 
 import { ROOT_FOLDER_LABEL, ROW_ACTION_REVEAL_CLASS } from "../../DocumentList.constants";
+import { Collapse } from "../Collapse";
 import { FavoriteButton } from "../FavoriteButton";
 import { HtmlFolderRows } from "../HtmlFolderRows";
 
@@ -73,12 +74,11 @@ const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PAT
         onClick={isConnected && !forceExpanded ? () => setIsExpanded(previous => !previous) : undefined}
       />
 
-      {isOpen && folder.htmlFolders.length === 0 && (
-        <p className="m-0 flex h-32 items-center pl-24 text-sm text-text-tertiary">HTML 문서 없음</p>
-      )}
-
-      {/* 접어도 안쪽 줄을 지우지 않고 감춘다 — HTML 폴더를 펼쳐 둔 상태가 남는다 */}
-      <div className={isOpen ? "contents" : "hidden"}>
+      {/* 접어도 안쪽 줄을 지우지 않는다 — HTML 폴더를 펼쳐 둔 상태가 남는다 */}
+      <Collapse open={isOpen}>
+        {folder.htmlFolders.length === 0 && (
+          <p className="m-0 flex h-32 items-center pl-24 text-sm text-text-tertiary">HTML 문서 없음</p>
+        )}
         {folder.htmlFolders.map(htmlFolder => (
           <HtmlFolderRows
             key={htmlFolder.path}
@@ -88,7 +88,7 @@ const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PAT
             forceExpanded={forceExpandedPaths.includes(htmlFolder.path)}
           />
         ))}
-      </div>
+      </Collapse>
 
       <ConfirmDialog
         open={isRemoveOpen}

@@ -40,7 +40,10 @@ const TreeRow = ({ depth, icon, label, expanded, selected = false, trailing, act
         {expanded !== undefined && (
           <ChevronRightIcon
             size={16}
-            className={clsx("shrink-0 text-text-tertiary", expanded && "rotate-90")}
+            className={clsx(
+              "shrink-0 text-text-tertiary transition-transform duration-200 motion-reduce:transition-none",
+              expanded && "rotate-90",
+            )}
           />
         )}
         {icon}
