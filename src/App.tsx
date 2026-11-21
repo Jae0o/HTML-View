@@ -1,3 +1,5 @@
-const App = () => <main className="text-base font-semibold text-text-brand">0Docs</main>;
+import { ViewerPage } from "@views/pages/viewer";
+
+const App = () => <ViewerPage />;
 
 export default App;
