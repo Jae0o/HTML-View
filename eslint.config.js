@@ -3,6 +3,7 @@ import js from "@eslint/js";
 import prettierConfig from "eslint-config-prettier";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
+import storybook from "eslint-plugin-storybook";
 import { defineConfig, globalIgnores } from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
@@ -73,6 +74,7 @@ export default defineConfig([
       ],
     },
   },
+  ...storybook.configs["flat/recommended"],
   {
     // .constants.tsx 는 JSX 를 담은 상수 파일이지 컴포넌트 파일이 아니다 — Fast Refresh 경계 규칙의 대상이 아니다
     files: ["**/*.constants.tsx"],
