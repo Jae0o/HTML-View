@@ -10,5 +10,6 @@ export * from "./LogoMark";
 export * from "./SearchInput";
 export * from "./Spinner";
 export * from "./Tag";
+export * from "./Toast";
 export * from "./Tooltip";
 export * from "./TruncatedText";
