@@ -128,4 +128,24 @@ describe("useFolderStore", () => {
     expect(useFolderStore.getState().folders[0].status).toBe("disconnected");
     expect(scanFolder).not.toHaveBeenCalled();
   });
+
+  it("refreshFolder 는 다시 훑은 결과로 바꾼다", async () => {
+    const documents = [{ name: "새 문서", fileName: "새 문서.html", handle: {} as FileSystemFileHandle }];
+
+    useFolderStore.setState({ folders: [asFolder("a", fakeHandle("docs"), "connected")] });
+    vi.mocked(scanFolder).mockResolvedValue([{ path: "", documents }]);
+
+    await useFolderStore.getState().refreshFolder("a");
+
+    expect(useFolderStore.getState().folders[0].htmlFolders).toEqual([{ path: "", documents }]);
+  });
+
+  it("refreshFolder 에서 읽기 권한이 풀려 있으면 연결 끊김으로 바꾼다", async () => {
+    useFolderStore.setState({ folders: [asFolder("a", fakeHandle("docs", "prompt"), "connected")] });
+
+    await useFolderStore.getState().refreshFolder("a");
+
+    expect(useFolderStore.getState().folders[0].status).toBe("disconnected");
+    expect(scanFolder).not.toHaveBeenCalled();
+  });
 });

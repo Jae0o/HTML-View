@@ -44,19 +44,30 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+// 목록이 접힌 상태 — 빈 화면에 「목록 열기」 버튼이 보인다
+const LIST_CLOSED = { isListOpen: false, isListDismissed: false };
+
 /** 등록된 폴더가 없다 — 「폴더 추가」 를 누르면 폴더 선택 창이 뜬다 */
 export const NoFolder: Story = {
   beforeEach: () => {
     useFolderStore.setState({ isRestored: true, folders: [] });
-    useViewerStore.setState({ selectedDocument: null });
+    useViewerStore.setState({ ...LIST_CLOSED, selectedDocument: null });
   },
 };
 
-/** 폴더는 있고 문서를 고르지 않았다 */
+/** 폴더는 있고 문서를 고르지 않았다 — 목록이 접혀 있어 「목록 열기」 버튼이 보인다 */
 export const NoDocument: Story = {
   beforeEach: () => {
     useFolderStore.setState({ isRestored: true, folders: [SAMPLE_FOLDER] });
-    useViewerStore.setState({ selectedDocument: null });
+    useViewerStore.setState({ ...LIST_CLOSED, selectedDocument: null });
+  },
+};
+
+/** 목록이 열려 있을 때 — 빈 화면은 그대로 본문 한가운데에 있고 「목록 열기」 버튼은 없다 */
+export const NoDocumentListOpen: Story = {
+  beforeEach: () => {
+    useFolderStore.setState({ isRestored: true, folders: [SAMPLE_FOLDER] });
+    useViewerStore.setState({ isListOpen: true, isListDismissed: false, selectedDocument: null });
   },
 };
 
@@ -64,14 +75,31 @@ export const NoDocument: Story = {
 export const DocumentShown: Story = {
   beforeEach: () => {
     useFolderStore.setState({ isRestored: true, folders: [SAMPLE_FOLDER] });
-    useViewerStore.setState({ selectedDocument: { folderId: "sample", path: "plan-a", fileName: "결과.html" } });
+    useViewerStore.setState({
+      ...LIST_CLOSED,
+      selectedDocument: { folderId: "sample", path: "plan-a", fileName: "결과.html" },
+    });
   },
 };
 
-/** 고른 문서를 찾지 못했다 (옮겨짐 · 지워짐 · 연결 끊김) */
+/** 고른 문서를 찾지 못했다 (옮겨짐 · 지워짐) — 「다시 시도」 는 그 폴더를 다시 훑는다 */
 export const DocumentError: Story = {
   beforeEach: () => {
     useFolderStore.setState({ isRestored: true, folders: [SAMPLE_FOLDER] });
-    useViewerStore.setState({ selectedDocument: { folderId: "sample", path: "plan-a", fileName: "없는 문서.html" } });
+    useViewerStore.setState({
+      ...LIST_CLOSED,
+      selectedDocument: { folderId: "sample", path: "plan-a", fileName: "없는 문서.html" },
+    });
+  },
+};
+
+/** 등록 폴더의 연결이 끊겼다 — 「다시 연결」 은 읽기 권한을 다시 묻는다 */
+export const Disconnected: Story = {
+  beforeEach: () => {
+    useFolderStore.setState({
+      isRestored: true,
+      folders: [{ ...SAMPLE_FOLDER, status: "disconnected", htmlFolders: [] }],
+    });
+    useViewerStore.setState({ ...LIST_CLOSED, selectedDocument: null });
   },
 };

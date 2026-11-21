@@ -8,7 +8,11 @@ import type { FolderState } from "./useFolderStore.types";
 import { create } from "zustand";
 
 // 읽기 권한이 살아 있을 때만 훑는다. 권한이 풀렸거나 폴더가 없어졌으면 「연결 끊김」 으로 둔다
-const readFolder = async ({ id, name, handle }: FolderRecord): Promise<RegisteredFolder> => {
+const readFolder = async ({
+  id,
+  name,
+  handle,
+}: Pick<FolderRecord, "id" | "name" | "handle">): Promise<RegisteredFolder> => {
   try {
     if ((await handle.queryPermission({ mode: "read" })) !== "granted") throw new Error("읽기 권한 없음");
 
@@ -91,6 +95,15 @@ const useFolderStore = create<FolderState>((set, get) => ({
     } catch {
       useToastStore.getState().show(FOLDER_MESSAGE.reconnectFailed);
     }
+  },
+
+  refreshFolder: async id => {
+    const target = get().folders.find(folder => folder.id === id);
+    if (!target) return;
+
+    const refreshed = await readFolder(target);
+
+    set(state => ({ folders: state.folders.map(folder => (folder.id === id ? refreshed : folder)) }));
   },
 }));
 
