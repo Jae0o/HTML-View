@@ -18,7 +18,7 @@ const DROP_LINE_BOTTOM_CLASS = "pointer-events-none absolute inset-x-0 bottom-0 
 /**
  * 등록 폴더 줄들 — 등록 폴더 줄을 끌어 다른 등록 폴더의 위 · 아래에 놓으면 순서가 바뀐다(기기에 기억한다).
  * 놓을 자리는 마우스가 올라간 등록 폴더 묶음(안쪽 줄 포함)의 위 절반이면 그 위, 아래 절반이면 그 아래다.
- * 검색 중에도 같은 줄을 그대로 그린다 — 검색을 지워도 접어 둔 상태가 남는다
+ * 검색에서 빠진 줄은 그리지 않는다 — 접고 편 상태는 스토어에 있어, 검색을 지우면 보던 모양 그대로 돌아온다
  */
 const SortableFolderRows = ({ matches, isSearching }: SortableFolderRowsProps) => {
   const moveFolder = useFolderStore(state => state.moveFolder);
