@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { filterFolders, findDocument, isFolderPickerSupported, useFolderStore } from "@libs/features/folder";
 import { favoriteKey, filterFoldersByFormat, resolveFavorites, useViewerStore } from "@libs/features/viewer";
+import { useEscClose } from "@libs/hooks/common";
 
 import { FloatingSurface, IconButton, SearchInput, Tooltip } from "@views/components/common";
 import { FileHtmlIcon, FolderPlusIcon, HelpIcon, MarkdownIcon, MenuIcon, StarIcon } from "@views/components/icons";
@@ -9,17 +10,18 @@ import { SectionHeader } from "@views/components/viewer";
 
 import { favoriteLabel, filterFavorites } from "./DocumentList.utils";
 import { DocumentRow, FilterChip, FolderRows, HtmlFolderRows, SortableFolderRows } from "./components";
-import { useClickAway } from "./hooks";
+import { useClickAway, useListFocus } from "./hooks";
 
 // 목록 상자 — 닫혀 있을 때는 지우지 않고 감추기만 한다(줄의 펼침 상태가 남는다).
 // 열 때는 접기 버튼 자리(= 닫혔을 때의 열기 버튼 자리)에서 펼쳐지고, 닫을 때는 그 자리로 접혀 들어간다 — 보이는 영역(clip-path)을 200ms 동안 넓히고 좁힌다.
 // 접힌 영역: 위 · 왼쪽 1.3rem(테두리 1px + 안쪽 여백 12px)에서 접기 · 도움말 버튼 두 개(3.2 + 0.8 + 3.2 = 7.2rem) · 높이 3.2rem 만큼. 펼친 영역은 그림자가 잘리지 않게 상자보다 4rem 넓게 둔다.
+// 창이 480px 보다 좁으면 좌우 16px 를 남기고 창 폭에 맞춰 줄어든다.
 // 흐려지지 않는다 — 접기 아이콘이 끝까지 보여야 열기 버튼으로 바뀔 때 깜빡이지 않는다.
 // 움직임 줄이기 설정이면 영역은 그대로 두고 흐려지기만 한다. 사라지는 동안은 누름을 받지 않는다
 const SURFACE_OPEN_CLASS =
-  "absolute top-12 left-16 z-400 flex max-h-[calc(100vh-2.4rem)] w-[48rem] flex-col gap-8 p-12 transition-[opacity,clip-path,visibility] duration-200 motion-safe:[clip-path:inset(-4rem)]";
+  "absolute top-12 left-16 z-400 flex max-h-[calc(100vh-2.4rem)] w-[48rem] max-w-[calc(100vw-3.2rem)] flex-col gap-8 p-12 transition-[opacity,clip-path,visibility] duration-200 motion-safe:[clip-path:inset(-4rem)]";
 const SURFACE_CLOSED_CLASS =
-  "pointer-events-none invisible absolute top-12 left-16 z-400 flex max-h-[calc(100vh-2.4rem)] w-[48rem] flex-col gap-8 p-12 transition-[opacity,clip-path,visibility] duration-200 motion-safe:[clip-path:inset(1.3rem_calc(100%_-_8.5rem)_calc(100%_-_4.5rem)_1.3rem_round_0.6rem)] motion-reduce:opacity-0";
+  "pointer-events-none invisible absolute top-12 left-16 z-400 flex max-h-[calc(100vh-2.4rem)] w-[48rem] max-w-[calc(100vw-3.2rem)] flex-col gap-8 p-12 transition-[opacity,clip-path,visibility] duration-200 motion-safe:[clip-path:inset(1.3rem_calc(100%_-_8.5rem)_calc(100%_-_4.5rem)_1.3rem_round_0.6rem)] motion-reduce:opacity-0";
 
 // 열기 · 도움말 버튼 칸 — 빈 여백은 마우스를 통과시킨다. 목록이 열리면 상자가 다 펼쳐진 뒤(200ms) 감춘다. 닫히면 바로 보인다
 const OPEN_BUTTON_SHOWN_CLASS =
@@ -51,7 +53,20 @@ const DocumentList = () => {
 
   // 고른 문서를 찾을 수 있을 때만 목록 밖을 누르면 닫는다 — 빈 화면 · 문서를 찾지 못한 화면에서는 닫지 않는다.
   // 도움말 창이 열려 있는 동안도 닫지 않는다 — 창은 목록 밖에 그려져, 창 안을 누르면 목록 밖 누름으로 센다
-  const markInside = useClickAway(isListVisible && isDocumentShown && !isHelpOpen, dismissList);
+  const isDismissible = isListVisible && isDocumentShown && !isHelpOpen;
+  const markInside = useClickAway(isDismissible, dismissList);
+
+  // Esc 도 목록 밖 누름과 같은 조건에서 닫는다 (결정 Q2). 메뉴 · 창이 열려 있으면 그것만 닫히게 목록은 그대로 둔다
+  useEscClose(isDismissible, () => {
+    if (document.querySelector('dialog[open], [role="menu"]')) return;
+
+    dismissList();
+  });
+
+  // 열고 닫을 때 누른 버튼이 숨어도 포커스가 사라지지 않게 옮긴다 (결정 D4)
+  const surfaceRef = useRef<HTMLDivElement>(null);
+  const openButtonsRef = useRef<HTMLDivElement>(null);
+  useListFocus(isFolderPickerSupported() && isRestored, isListVisible, surfaceRef, openButtonsRef);
 
   // 검색어는 기억하지 않는다 — 입력하는 대로 목록을 거른다
   const [query, setQuery] = useState("");
@@ -72,7 +87,10 @@ const DocumentList = () => {
     <>
       {/* 목록 상자와 같은 자리 · 테두리 · 안쪽 여백 · 간격을 둬, 열기 · 도움말 버튼이 상자 안 접기 · 도움말 버튼과 같은 자리에 온다.
           지우지 않고 상자 아래 층에 늘 둔다 — 열고 닫는 순간에도 이 자리의 아이콘이 비지 않는다(깜빡임 방지) */}
-      <div className={isListVisible ? OPEN_BUTTON_HIDDEN_CLASS : OPEN_BUTTON_SHOWN_CLASS}>
+      <div
+        ref={openButtonsRef}
+        className={isListVisible ? OPEN_BUTTON_HIDDEN_CLASS : OPEN_BUTTON_SHOWN_CLASS}
+      >
         <Tooltip label="목록 열기">
           <IconButton
             floating
@@ -94,6 +112,7 @@ const DocumentList = () => {
       </div>
 
       <FloatingSurface
+        ref={surfaceRef}
         role="navigation"
         aria-label="문서 목록"
         onPointerDown={markInside}
