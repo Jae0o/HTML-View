@@ -1,7 +1,7 @@
 import { useToastStore } from "@libs/features/toast";
 
 import type { FolderRecord, RegisteredFolder } from "../../types";
-import { deleteFolderRecord, readFolderRecords, scanFolder, writeFolderRecord } from "../../utils";
+import { deleteFolderRecord, readFolderRecords, renameFolderRecord, scanFolder, writeFolderRecord } from "../../utils";
 import useFolderStore from "./useFolderStore";
 import { FOLDER_MESSAGE } from "./useFolderStore.constants";
 
@@ -12,6 +12,7 @@ vi.mock("../../utils/folderDb", () => ({
   readFolderRecords: vi.fn(),
   writeFolderRecord: vi.fn(),
   deleteFolderRecord: vi.fn(),
+  renameFolderRecord: vi.fn(),
 }));
 vi.mock("../../utils/scanFolder", () => ({ scanFolder: vi.fn() }));
 
@@ -54,6 +55,7 @@ describe("useFolderStore", () => {
     vi.mocked(scanFolder).mockResolvedValue([]);
     vi.mocked(writeFolderRecord).mockResolvedValue();
     vi.mocked(deleteFolderRecord).mockResolvedValue();
+    vi.mocked(renameFolderRecord).mockResolvedValue();
     useFolderStore.setState({ folders: [], isRestored: false });
     useToastStore.getState().hide();
   });
@@ -168,6 +170,44 @@ describe("useFolderStore", () => {
     expect(await useFolderStore.getState().removeFolder("a")).toBe(false);
     expect(useFolderStore.getState().folders).toHaveLength(1);
     expect(useToastStore.getState().message).toBe(FOLDER_MESSAGE.removeFailed);
+  });
+
+  it("renameFolder 는 앞뒤 빈칸을 뺀 이름을 기기에 저장하고 목록 이름을 바꾼다", async () => {
+    useFolderStore.setState({ folders: [asFolder("a", fakeHandle("docs"), "connected")] });
+
+    await useFolderStore.getState().renameFolder("a", "  기획 문서함 ");
+
+    expect(renameFolderRecord).toHaveBeenCalledWith("a", "기획 문서함");
+    expect(useFolderStore.getState().folders[0].name).toBe("기획 문서함");
+  });
+
+  it("renameFolder 에 빈 이름을 주면 실제 폴더 이름으로 되돌린다", async () => {
+    useFolderStore.setState({ folders: [{ ...asFolder("a", fakeHandle("docs"), "connected"), name: "기획 문서함" }] });
+
+    await useFolderStore.getState().renameFolder("a", "   ");
+
+    expect(renameFolderRecord).toHaveBeenCalledWith("a", "docs");
+    expect(useFolderStore.getState().folders[0].name).toBe("docs");
+  });
+
+  it("renameFolder 에 지금과 같은 이름을 주면 저장하지 않는다", async () => {
+    const folders = [asFolder("a", fakeHandle("docs"), "connected")];
+    useFolderStore.setState({ folders });
+
+    await useFolderStore.getState().renameFolder("a", "docs");
+
+    expect(renameFolderRecord).not.toHaveBeenCalled();
+    expect(useFolderStore.getState().folders).toBe(folders);
+  });
+
+  it("renameFolder 가 기기에 저장하지 못하면 이름을 그대로 두고 알린다", async () => {
+    useFolderStore.setState({ folders: [asFolder("a", fakeHandle("docs"), "connected")] });
+    vi.mocked(renameFolderRecord).mockRejectedValue(new Error("저장 실패"));
+
+    await useFolderStore.getState().renameFolder("a", "기획 문서함");
+
+    expect(useFolderStore.getState().folders[0].name).toBe("docs");
+    expect(useToastStore.getState().message).toBe(FOLDER_MESSAGE.renameFailed);
   });
 
   it("refreshFolders 는 새로 생긴 문서를 반영하고, 바뀐 것이 없는 폴더는 그대로 둔다", async () => {

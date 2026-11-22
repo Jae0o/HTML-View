@@ -1,7 +1,14 @@
 import { useToastStore } from "@libs/features/toast";
 
 import type { FolderRecord, RegisteredFolder } from "../../types";
-import { deleteFolderRecord, mergeHtmlFolders, readFolderRecords, scanFolder, writeFolderRecord } from "../../utils";
+import {
+  deleteFolderRecord,
+  mergeHtmlFolders,
+  readFolderRecords,
+  renameFolderRecord,
+  scanFolder,
+  writeFolderRecord,
+} from "../../utils";
 import { FOLDER_MESSAGE } from "./useFolderStore.constants";
 import type { FolderState } from "./useFolderStore.types";
 
@@ -127,6 +134,25 @@ const useFolderStore = create<FolderState>((set, get) => ({
       useToastStore.getState().show(FOLDER_MESSAGE.removeFailed);
 
       return false;
+    }
+  },
+
+  renameFolder: async (id, name) => {
+    const target = get().folders.find(folder => folder.id === id);
+    if (!target) return;
+
+    // 비우면 실제 폴더 이름(폴더 연결이 늘 알고 있다)으로 되돌린다
+    const nextName = name.trim() || target.handle.name;
+    if (nextName === target.name) return;
+
+    try {
+      await renameFolderRecord(id, nextName);
+
+      set(state => ({
+        folders: state.folders.map(folder => (folder.id === id ? { ...folder, name: nextName } : folder)),
+      }));
+    } catch {
+      useToastStore.getState().show(FOLDER_MESSAGE.renameFailed);
     }
   },
 
