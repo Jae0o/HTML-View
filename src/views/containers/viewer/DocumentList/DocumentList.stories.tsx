@@ -5,13 +5,14 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import DocumentList from "./DocumentList";
 
-// 스토리용 등록 폴더 — 폴더 연결(handle)은 화면에 쓰이지 않아 비워 둔다
+// 스토리용 등록 폴더 — 폴더 연결(handle)은 실제 폴더 이름만 쓴다(이름 변경 입력 칸을 비우면 보이는 글자)
 const document = (name: string) => ({ name, fileName: `${name}.html`, handle: {} as FileSystemFileHandle });
 
 const FOLDERS = [
   {
     id: "sample",
     name: "sample-project",
+    handle: { name: "sample-project" },
     status: "connected",
     htmlFolders: [
       { path: "", documents: [document("개요")] },
@@ -22,8 +23,8 @@ const FOLDERS = [
       },
     ],
   },
-  { id: "empty", name: "empty-project", status: "connected", htmlFolders: [] },
-  { id: "lost", name: "moved-project", status: "disconnected", htmlFolders: [] },
+  { id: "empty", name: "empty-project", handle: { name: "empty-project" }, status: "connected", htmlFolders: [] },
+  { id: "lost", name: "moved-project", handle: { name: "moved-project" }, status: "disconnected", htmlFolders: [] },
 ] as unknown as RegisteredFolder[];
 
 const meta: Meta<typeof DocumentList> = {

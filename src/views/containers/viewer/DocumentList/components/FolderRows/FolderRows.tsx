@@ -3,7 +3,7 @@ import { useState } from "react";
 import { type RegisteredFolder, useFolderStore } from "@libs/features/folder";
 import { useViewerStore } from "@libs/features/viewer";
 
-import { Button, ConfirmDialog } from "@views/components/common";
+import { Button, ConfirmDialog, TextInput } from "@views/components/common";
 import { FolderIcon } from "@views/components/icons";
 import { TreeRow } from "@views/components/viewer";
 
@@ -23,18 +23,33 @@ interface FolderRowsProps {
 
 const NO_PATHS: string[] = [];
 
-/** 등록 폴더 한 줄과 그 안의 HTML 폴더 줄들. 줄 오른쪽 끝 ⋯ 메뉴의 「등록 해제」 확인 창도 여기서 띄운다 */
+/** 등록 폴더 한 줄과 그 안의 HTML 폴더 줄들. 줄 오른쪽 끝 ⋯ 메뉴의 「이름 변경」 입력 창 · 「등록 해제」 확인 창도 여기서 띄운다 */
 const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PATHS }: FolderRowsProps) => {
   const reconnect = useFolderStore(state => state.reconnect);
   const removeFolder = useFolderStore(state => state.removeFolder);
+  const renameFolder = useFolderStore(state => state.renameFolder);
   const removeFavoritesOfFolder = useViewerStore(state => state.removeFavoritesOfFolder);
 
   // 등록 폴더는 처음에 펼쳐 있다
   const [isExpanded, setIsExpanded] = useState(true);
   const [isRemoveOpen, setIsRemoveOpen] = useState(false);
+  const [isRenameOpen, setIsRenameOpen] = useState(false);
+  const [nameInput, setNameInput] = useState("");
 
   const isConnected = folder.status === "connected";
   const isOpen = isConnected && (forceExpanded || isExpanded);
+
+  // 입력 칸은 지금 이름을 채운 채 연다
+  const openRename = () => {
+    setNameInput(folder.name);
+    setIsRenameOpen(true);
+  };
+
+  // 비우고 저장하면 스토어가 실제 폴더 이름으로 되돌린다
+  const handleRename = async () => {
+    setIsRenameOpen(false);
+    await renameFolder(folder.id, nameInput);
+  };
 
   // 등록을 해제하면 그 폴더와 안쪽 항목의 즐겨찾기도 함께 지운다
   const handleRemove = async () => {
@@ -61,7 +76,12 @@ const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PAT
               </Button>
             )}
             <FavoriteButton item={{ kind: "folder", folderId: folder.id }} />
-            <MoreMenu items={[{ label: "등록 해제", onSelect: () => setIsRemoveOpen(true) }]} />
+            <MoreMenu
+              items={[
+                { label: "이름 변경", onSelect: openRename },
+                { label: "등록 해제", onSelect: () => setIsRemoveOpen(true) },
+              ]}
+            />
           </>
         }
         onClick={isConnected && !forceExpanded ? () => setIsExpanded(previous => !previous) : undefined}
@@ -82,6 +102,28 @@ const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PAT
           />
         ))}
       </Collapse>
+
+      <ConfirmDialog
+        open={isRenameOpen}
+        title="폴더 이름 변경"
+        description="0Docs 목록에만 보이는 이름입니다. 실제 폴더 이름은 바뀌지 않습니다."
+        confirmLabel="변경"
+        onConfirm={handleRename}
+        onCancel={() => setIsRenameOpen(false)}
+      >
+        {/* 열리면 이 칸에 포커스가 가고 글자 전체가 선택된다. 비우면 실제 폴더 이름이 흐리게 보인다 */}
+        <TextInput
+          aria-label="폴더 이름"
+          value={nameInput}
+          placeholder={folder.handle.name}
+          onChange={e => setNameInput(e.target.value)}
+          onFocus={e => e.currentTarget.select()}
+          onKeyDown={e => {
+            // 한글 조합 중 Enter 는 글자를 확정하는 키라 저장하지 않는다
+            if (e.key === "Enter" && !e.nativeEvent.isComposing) handleRename();
+          }}
+        />
+      </ConfirmDialog>
 
       <ConfirmDialog
         open={isRemoveOpen}

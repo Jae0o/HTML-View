@@ -7,10 +7,11 @@ import FolderRows from "./FolderRows";
 
 const document = (name: string) => ({ name, fileName: `${name}.html`, handle: {} as FileSystemFileHandle });
 
-// 스토리용 등록 폴더 — 폴더 연결(handle)은 화면에 쓰이지 않아 비워 둔다
+// 스토리용 등록 폴더 — 폴더 연결(handle)은 실제 폴더 이름만 쓴다(이름 변경 입력 칸을 비우면 보이는 글자)
 const FOLDER = {
   id: "sample",
   name: "sample-project",
+  handle: { name: "sample-project" },
   status: "connected",
   htmlFolders: [
     { path: "", documents: [document("개요")] },
@@ -38,7 +39,7 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-/** 줄에 마우스를 올리면 오른쪽 끝에 ⋯ 버튼이 보인다. 누르면 메뉴가 열리고, 「등록 해제」 를 누르면 확인 창이 뜬다 */
+/** 줄에 마우스를 올리면 오른쪽 끝에 ⋯ 버튼이 보인다. 누르면 메뉴가 열리고, 「이름 변경」 은 입력 창 · 「등록 해제」 는 확인 창이 뜬다 */
 export const Connected: Story = {};
 
 /** HTML 문서가 없는 등록 폴더 */
