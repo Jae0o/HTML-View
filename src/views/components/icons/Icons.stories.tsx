@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { ChevronRightIcon } from "./ChevronRightIcon";
 import { CloseIcon } from "./CloseIcon";
+import { DownloadIcon } from "./DownloadIcon";
 import { FileHtmlIcon } from "./FileHtmlIcon";
 import { FolderIcon } from "./FolderIcon";
 import { FolderPlusIcon } from "./FolderPlusIcon";
@@ -10,10 +11,11 @@ import { MoreIcon } from "./MoreIcon";
 import { SearchIcon } from "./SearchIcon";
 import { StarIcon } from "./StarIcon";
 
-/** 아이콘 9종을 한 화면에서 본다 — 크기는 쓰는 자리의 값(16px · 폴더와 문서는 20px)이다 */
+/** 아이콘 10종을 한 화면에서 본다 — 크기는 쓰는 자리의 값(16px · 폴더와 문서는 20px)이다 */
 const ICONS = [
   { name: "ChevronRightIcon", icon: <ChevronRightIcon size={16} /> },
   { name: "CloseIcon", icon: <CloseIcon size={16} /> },
+  { name: "DownloadIcon", icon: <DownloadIcon size={16} /> },
   { name: "FileHtmlIcon", icon: <FileHtmlIcon size={20} /> },
   { name: "FolderIcon", icon: <FolderIcon size={20} /> },
   { name: "FolderPlusIcon", icon: <FolderPlusIcon size={16} /> },

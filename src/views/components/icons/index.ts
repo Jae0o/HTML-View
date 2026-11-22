@@ -1,5 +1,6 @@
 export * from "./ChevronRightIcon";
 export * from "./CloseIcon";
+export * from "./DownloadIcon";
 export * from "./FileHtmlIcon";
 export * from "./FolderIcon";
 export * from "./FolderPlusIcon";
