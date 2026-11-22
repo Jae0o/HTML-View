@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { Button } from "../Button";
+import { TextInput } from "../TextInput";
 import ConfirmDialog from "./ConfirmDialog";
 
 const meta: Meta<typeof ConfirmDialog> = {
@@ -27,6 +28,22 @@ type Story = StoryObj<typeof meta>;
 
 /** 등록 해제 확인 */
 export const Danger: Story = {};
+
+/** 입력 칸을 둔 창 — 열리면 입력 칸에 포커스가 간다 */
+export const WithInput: Story = {
+  args: {
+    tone: "default",
+    title: "폴더 이름 변경",
+    description: "0Docs 목록에만 보이는 이름입니다. 실제 폴더 이름은 바뀌지 않습니다.",
+    confirmLabel: "변경",
+    children: (
+      <TextInput
+        aria-label="폴더 이름"
+        defaultValue="sample-project"
+      />
+    ),
+  },
+};
 
 /** 버튼으로 열고 취소 · Esc · 확인으로 닫는다 */
 export const OpenAndClose: Story = {

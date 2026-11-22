@@ -14,6 +14,7 @@ const ConfirmDialog = ({
   confirmLabel,
   cancelLabel = "취소",
   tone = "default",
+  children,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) => {
@@ -59,8 +60,9 @@ const ConfirmDialog = ({
             {description}
           </p>
         </div>
+        {children}
         <div className="flex justify-end gap-16">
-          {/* 창이 열리면 브라우저가 첫 버튼에 포커스를 둔다 — 취소가 먼저여야 실수로 Enter 를 눌러도 동작이 실행되지 않는다. 순서를 바꾸지 않는다 */}
+          {/* 입력 칸이 없으면 창이 열릴 때 브라우저가 첫 버튼에 포커스를 둔다 — 취소가 먼저여야 실수로 Enter 를 눌러도 동작이 실행되지 않는다. 순서를 바꾸지 않는다 */}
           <Button onClick={onCancel}>{cancelLabel}</Button>
           <Button
             variant={tone === "danger" ? "danger" : "primary"}
