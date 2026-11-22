@@ -22,9 +22,24 @@ const FOLDERS = [
         documents: [document("결과 보고")],
       },
     ],
+    hiddenPaths: [],
   },
-  { id: "empty", name: "empty-project", handle: { name: "empty-project" }, status: "connected", htmlFolders: [] },
-  { id: "lost", name: "moved-project", handle: { name: "moved-project" }, status: "disconnected", htmlFolders: [] },
+  {
+    id: "empty",
+    name: "empty-project",
+    handle: { name: "empty-project" },
+    status: "connected",
+    htmlFolders: [],
+    hiddenPaths: [],
+  },
+  {
+    id: "lost",
+    name: "moved-project",
+    handle: { name: "moved-project" },
+    status: "disconnected",
+    htmlFolders: [],
+    hiddenPaths: [],
+  },
 ] as unknown as RegisteredFolder[];
 
 const meta: Meta<typeof DocumentList> = {

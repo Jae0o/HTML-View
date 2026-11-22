@@ -40,7 +40,10 @@ export interface RegisteredFolder {
   name: string;
   handle: FileSystemDirectoryHandle;
   status: FolderStatus;
+  /** 숨긴 폴더를 뺀 HTML 폴더 */
   htmlFolders: HtmlFolder[];
+  /** 목록에서 숨긴 폴더의 경로 — 그 폴더와 아래 폴더가 목록에서 빠진다. 숨긴 순서 */
+  hiddenPaths: string[];
 }
 
 /** 기기에 저장하는 등록 폴더 */
@@ -50,6 +53,8 @@ export interface FolderRecord {
   handle: FileSystemDirectoryHandle;
   /** 등록한 때 (목록 순서) */
   addedAt: number;
+  /** 목록에서 숨긴 폴더의 경로. 숨기기가 생기기 전에 저장한 기록에는 없다 — 없으면 숨긴 것이 없다 */
+  hiddenPaths?: string[];
 }
 
 /** 검색에 맞은 등록 폴더 한 개 */

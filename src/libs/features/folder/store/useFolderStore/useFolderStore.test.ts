@@ -1,7 +1,14 @@
 import { useToastStore } from "@libs/features/toast";
 
 import type { FolderRecord, RegisteredFolder } from "../../types";
-import { deleteFolderRecord, readFolderRecords, renameFolderRecord, scanFolder, writeFolderRecord } from "../../utils";
+import {
+  deleteFolderRecord,
+  readFolderRecords,
+  renameFolderRecord,
+  scanFolder,
+  writeFolderRecord,
+  writeHiddenPaths,
+} from "../../utils";
 import useFolderStore from "./useFolderStore";
 import { FOLDER_MESSAGE } from "./useFolderStore.constants";
 
@@ -13,6 +20,7 @@ vi.mock("../../utils/folderDb", () => ({
   writeFolderRecord: vi.fn(),
   deleteFolderRecord: vi.fn(),
   renameFolderRecord: vi.fn(),
+  writeHiddenPaths: vi.fn(),
 }));
 vi.mock("../../utils/scanFolder", () => ({ scanFolder: vi.fn() }));
 
@@ -39,7 +47,12 @@ const asRecord = (id: string, handle: FakeHandle, addedAt: number) =>
   ({ id, name: handle.name, handle, addedAt }) as unknown as FolderRecord;
 
 const asFolder = (id: string, handle: FakeHandle, status: RegisteredFolder["status"]) =>
-  ({ id, name: handle.name, handle, status, htmlFolders: [] }) as unknown as RegisteredFolder;
+  ({ id, name: handle.name, handle, status, htmlFolders: [], hiddenPaths: [] }) as unknown as RegisteredFolder;
+
+const htmlFolder = (path: string) => ({
+  path,
+  documents: [{ name: "문서", fileName: "문서.html", handle: {} as FileSystemFileHandle }],
+});
 
 const pick = (handle: FakeHandle | Error) =>
   vi.stubGlobal("window", {
@@ -56,6 +69,7 @@ describe("useFolderStore", () => {
     vi.mocked(writeFolderRecord).mockResolvedValue();
     vi.mocked(deleteFolderRecord).mockResolvedValue();
     vi.mocked(renameFolderRecord).mockResolvedValue();
+    vi.mocked(writeHiddenPaths).mockResolvedValue();
     useFolderStore.setState({ folders: [], isRestored: false });
     useToastStore.getState().hide();
   });
@@ -208,6 +222,149 @@ describe("useFolderStore", () => {
 
     expect(useFolderStore.getState().folders[0].name).toBe("docs");
     expect(useToastStore.getState().message).toBe(FOLDER_MESSAGE.renameFailed);
+  });
+
+  it("refreshFolder 는 숨긴 폴더를 빼고 보여 준다", async () => {
+    useFolderStore.setState({
+      folders: [{ ...asFolder("a", fakeHandle("docs"), "connected"), hiddenPaths: ["done"] }],
+    });
+    vi.mocked(scanFolder).mockResolvedValue([htmlFolder("done / features-1"), htmlFolder("help-modal")]);
+
+    await useFolderStore.getState().refreshFolder("a");
+
+    expect(useFolderStore.getState().folders[0].htmlFolders.map(folder => folder.path)).toEqual(["help-modal"]);
+    expect(useFolderStore.getState().folders[0].hiddenPaths).toEqual(["done"]);
+  });
+
+  it("숨긴 경로가 없는 기록(새로 추가 · 숨기기 전에 저장한 기록)은 숨긴 것이 없다", async () => {
+    pick(fakeHandle("docs"));
+
+    await useFolderStore.getState().addFolder();
+
+    expect(useFolderStore.getState().folders[0].hiddenPaths).toEqual([]);
+  });
+
+  it("hidePath 는 숨긴 경로를 기기에 저장하고, 그 폴더와 아래 폴더를 목록에서 빼고 알린다", async () => {
+    useFolderStore.setState({
+      folders: [
+        {
+          ...asFolder("a", fakeHandle("docs"), "connected"),
+          htmlFolders: [htmlFolder("done / features-1"), htmlFolder("done / features-2"), htmlFolder("help-modal")],
+        },
+      ],
+    });
+
+    expect(await useFolderStore.getState().hidePath("a", "done")).toBe(true);
+    expect(writeHiddenPaths).toHaveBeenCalledWith("a", ["done"]);
+
+    const [folder] = useFolderStore.getState().folders;
+
+    expect(folder.hiddenPaths).toEqual(["done"]);
+    expect(folder.htmlFolders.map(htmlFolder => htmlFolder.path)).toEqual(["help-modal"]);
+    expect(useToastStore.getState().message).toBe(FOLDER_MESSAGE.hidden);
+  });
+
+  it("hidePath 로 위 폴더를 숨기면 그 아래를 따로 숨겨 둔 경로는 정리한다", async () => {
+    useFolderStore.setState({
+      folders: [{ ...asFolder("a", fakeHandle("docs"), "connected"), hiddenPaths: ["done / features-1", "done-old"] }],
+    });
+
+    await useFolderStore.getState().hidePath("a", "done");
+
+    expect(useFolderStore.getState().folders[0].hiddenPaths).toEqual(["done-old", "done"]);
+    expect(writeHiddenPaths).toHaveBeenCalledWith("a", ["done-old", "done"]);
+  });
+
+  it("hidePath 가 기기에 저장하지 못하면 목록을 그대로 두고 알린다", async () => {
+    const folders = [{ ...asFolder("a", fakeHandle("docs"), "connected"), htmlFolders: [htmlFolder("done")] }];
+    useFolderStore.setState({ folders });
+    vi.mocked(writeHiddenPaths).mockRejectedValue(new Error("저장 실패"));
+
+    expect(await useFolderStore.getState().hidePath("a", "done")).toBe(false);
+    expect(useFolderStore.getState().folders).toBe(folders);
+    expect(useToastStore.getState().message).toBe(FOLDER_MESSAGE.hideFailed);
+  });
+
+  it("showPath 는 숨긴 경로를 기기에서 빼고 다시 훑어 그 폴더를 되돌린다", async () => {
+    useFolderStore.setState({
+      folders: [
+        {
+          ...asFolder("a", fakeHandle("docs"), "connected"),
+          htmlFolders: [htmlFolder("help-modal")],
+          hiddenPaths: ["done", ".storybook"],
+        },
+      ],
+    });
+    vi.mocked(scanFolder).mockResolvedValue([
+      htmlFolder(".storybook"),
+      htmlFolder("done / features-1"),
+      htmlFolder("help-modal"),
+    ]);
+
+    await useFolderStore.getState().showPath("a", "done");
+
+    const [folder] = useFolderStore.getState().folders;
+
+    expect(writeHiddenPaths).toHaveBeenCalledWith("a", [".storybook"]);
+    expect(folder.hiddenPaths).toEqual([".storybook"]);
+    expect(folder.htmlFolders.map(htmlFolder => htmlFolder.path)).toEqual(["done / features-1", "help-modal"]);
+  });
+
+  it("showPath 는 연결이 끊긴 폴더면 숨긴 경로만 바꾸고 다시 훑지 않는다", async () => {
+    useFolderStore.setState({
+      folders: [{ ...asFolder("a", fakeHandle("docs"), "disconnected"), hiddenPaths: ["done"] }],
+    });
+
+    await useFolderStore.getState().showPath("a", "done");
+
+    expect(useFolderStore.getState().folders[0].hiddenPaths).toEqual([]);
+    expect(scanFolder).not.toHaveBeenCalled();
+  });
+
+  it("showPath 를 이어 누르면 둘 다 다시 보인다 — 저장하자마자 숨긴 경로를 바꿔, 다음 누름이 옛 목록으로 저장하지 않는다", async () => {
+    useFolderStore.setState({
+      folders: [{ ...asFolder("a", fakeHandle("docs"), "connected"), hiddenPaths: ["done", ".storybook"] }],
+    });
+    let finishScan: (value: never[]) => void = () => {};
+    vi.mocked(scanFolder).mockImplementationOnce(() => new Promise(resolve => (finishScan = resolve)));
+
+    const first = useFolderStore.getState().showPath("a", "done");
+    await vi.waitFor(() => expect(useFolderStore.getState().folders[0].hiddenPaths).toEqual([".storybook"]));
+    await useFolderStore.getState().showPath("a", ".storybook");
+    finishScan([]);
+    await first;
+
+    expect(useFolderStore.getState().folders[0].hiddenPaths).toEqual([]);
+    expect(writeHiddenPaths).toHaveBeenLastCalledWith("a", []);
+  });
+
+  it("showPath 가 기기에 저장하지 못하면 숨긴 채로 두고 알린다", async () => {
+    const folders = [{ ...asFolder("a", fakeHandle("docs"), "connected"), hiddenPaths: ["done"] }];
+    useFolderStore.setState({ folders });
+    vi.mocked(writeHiddenPaths).mockRejectedValue(new Error("저장 실패"));
+
+    await useFolderStore.getState().showPath("a", "done");
+
+    expect(useFolderStore.getState().folders).toBe(folders);
+    expect(scanFolder).not.toHaveBeenCalled();
+    expect(useToastStore.getState().message).toBe(FOLDER_MESSAGE.showFailed);
+  });
+
+  it("refreshFolders 는 다시 훑어도 숨긴 폴더를 빼 둔다 — 숨긴 폴더 아래에 새로 생긴 폴더도", async () => {
+    useFolderStore.setState({
+      folders: [
+        {
+          ...asFolder("a", fakeHandle("docs"), "connected"),
+          htmlFolders: [htmlFolder("help-modal")],
+          hiddenPaths: ["done"],
+        },
+      ],
+    });
+    vi.mocked(scanFolder).mockResolvedValue([htmlFolder("done / new-plan"), htmlFolder("help-modal")]);
+
+    await useFolderStore.getState().refreshFolders();
+
+    expect(useFolderStore.getState().folders[0].htmlFolders.map(folder => folder.path)).toEqual(["help-modal"]);
   });
 
   it("refreshFolders 는 새로 생긴 문서를 반영하고, 바뀐 것이 없는 폴더는 그대로 둔다", async () => {

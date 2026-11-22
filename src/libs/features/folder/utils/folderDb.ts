@@ -71,6 +71,28 @@ export const renameFolderRecord = async (id: string, name: string): Promise<void
   }
 };
 
+/** 등록 폴더 기록의 숨긴 경로만 바꾼다 — 같은 기록을 읽고 고쳐 쓰는 것을 한 번에 한다 */
+export const writeHiddenPaths = async (id: string, hiddenPaths: string[]): Promise<void> => {
+  const db = await openDb();
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, "readwrite");
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.get(id);
+
+      request.onsuccess = () => {
+        if (request.result) store.put({ ...(request.result as FolderRecord), hiddenPaths });
+      };
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
+    });
+  } finally {
+    db.close();
+  }
+};
+
 export const deleteFolderRecord = async (id: string): Promise<void> => {
   const db = await openDb();
 
