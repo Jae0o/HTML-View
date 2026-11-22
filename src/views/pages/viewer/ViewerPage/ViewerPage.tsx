@@ -1,4 +1,4 @@
-import { DocumentActions, DocumentList, ViewerBody } from "@views/containers/viewer";
+import { DocumentActions, DocumentList, HelpDialog, ViewerBody } from "@views/containers/viewer";
 import { ViewerLayout } from "@views/layouts";
 
 import { useFolderAutoRefresh, useRestoreFolders } from "./hooks";
@@ -9,12 +9,15 @@ const ViewerPage = () => {
   useFolderAutoRefresh();
 
   return (
-    <ViewerLayout
-      actions={<DocumentActions />}
-      floating={<DocumentList />}
-    >
-      <ViewerBody />
-    </ViewerLayout>
+    <>
+      <ViewerLayout
+        actions={<DocumentActions />}
+        floating={<DocumentList />}
+      >
+        <ViewerBody />
+      </ViewerLayout>
+      <HelpDialog />
+    </>
   );
 };
 
