@@ -46,6 +46,8 @@ const meta: Meta<typeof DocumentList> = {
       selectedDocument: null,
       favorites: [],
       listView: "all",
+      // 「?」 를 누르면 열림 상태만 남는다(이 스토리에는 도움말 창이 없다) — 스토리마다 닫아 둔다
+      isHelpOpen: false,
     });
   },
 };
