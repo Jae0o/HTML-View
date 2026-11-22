@@ -4,8 +4,12 @@ import {
   findDocument,
   groupHtmlFiles,
   isExcludedDirectory,
+  isHiddenPath,
   isHtmlFile,
+  joinPath,
   mergeHtmlFolders,
+  removeHiddenFolders,
+  splitPath,
 } from "./folderTree";
 
 import { describe, expect, it } from "vitest";
@@ -13,10 +17,46 @@ import { describe, expect, it } from "vitest";
 const file = (directories: string[], fileName: string) => ({ directories, fileName, handle: fileName });
 
 describe("isExcludedDirectory", () => {
-  it("점으로 시작하는 폴더와 의존성 폴더를 뺀다", () => {
+  it("정해 둔 무거운 폴더만 빼고, 그 밖의 점(.) 폴더는 훑는다", () => {
     expect(isExcludedDirectory(".git")).toBe(true);
+    expect(isExcludedDirectory(".venv")).toBe(true);
     expect(isExcludedDirectory("node_modules")).toBe(true);
+    expect(isExcludedDirectory(".claude")).toBe(false);
     expect(isExcludedDirectory("completed")).toBe(false);
+  });
+});
+
+describe("splitPath · joinPath", () => {
+  it("경로를 폴더 이름들로 나누고 다시 잇는다 — 등록 폴더 바로 아래는 빈 배열", () => {
+    expect(splitPath("done / features-1 / completed-docs")).toEqual(["done", "features-1", "completed-docs"]);
+    expect(splitPath("")).toEqual([]);
+    expect(joinPath(["done", "features-1"])).toBe("done / features-1");
+  });
+});
+
+describe("isHiddenPath", () => {
+  it("숨긴 폴더 자신과 그 아래 폴더가 걸리고, 이름이 비슷한 폴더는 걸리지 않는다", () => {
+    expect(isHiddenPath("done", ["done"])).toBe(true);
+    expect(isHiddenPath("done / features-1 / completed-docs", ["done"])).toBe(true);
+    expect(isHiddenPath("done-old", ["done"])).toBe(false);
+    expect(isHiddenPath("help-modal / completed-docs", ["done"])).toBe(false);
+  });
+
+  it("등록 폴더 바로 아래(빈 글자)를 숨기면 그 줄만 걸린다", () => {
+    expect(isHiddenPath("", [""])).toBe(true);
+    expect(isHiddenPath("done", [""])).toBe(false);
+  });
+});
+
+describe("removeHiddenFolders", () => {
+  it("숨긴 경로에 걸리는 HTML 폴더를 빼고, 숨긴 것이 없으면 같은 배열을 돌려준다", () => {
+    const folders: HtmlFolder<string>[] = [
+      { path: "done / features-1", documents: [] },
+      { path: "help-modal", documents: [] },
+    ];
+
+    expect(removeHiddenFolders(folders, ["done"]).map(folder => folder.path)).toEqual(["help-modal"]);
+    expect(removeHiddenFolders(folders, [])).toBe(folders);
   });
 });
 

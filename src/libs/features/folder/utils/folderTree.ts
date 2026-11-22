@@ -8,10 +8,35 @@ const HTML_EXTENSION = /\.html?$/i;
 // 이름순 — 숫자는 크기순(2 가 10 보다 앞), 대소문자를 가리지 않는다
 const collator = new Intl.Collator("ko", { numeric: true, sensitivity: "base" });
 
-/** 훑지 않는 폴더 — 점(.)으로 시작하는 폴더와 의존성 폴더 */
-export const isExcludedDirectory = (name: string): boolean => name.startsWith(".") || name === "node_modules";
+// 훑지 않는 폴더 — 크기만 크고 문서가 없는 폴더. 그 밖의 점(.) 폴더(.claude 등)는 훑는다
+const EXCLUDED_DIRECTORIES = new Set([".git", ".venv", "node_modules"]);
+
+/** 훑지 않는 폴더인지 — 이름이 정해 둔 목록에 있을 때만 (.git · .venv · node_modules) */
+export const isExcludedDirectory = (name: string): boolean => EXCLUDED_DIRECTORIES.has(name);
 
 export const isHtmlFile = (fileName: string): boolean => HTML_EXTENSION.test(fileName);
+
+/** 경로를 폴더 이름들로 나눈다 — 등록 폴더 바로 아래(빈 글자)는 빈 배열 */
+export const splitPath = (path: string): string[] => (path ? path.split(PATH_SEPARATOR) : []);
+
+/** 폴더 이름들을 경로로 잇는다 */
+export const joinPath = (names: string[]): string => names.join(PATH_SEPARATOR);
+
+/**
+ * 숨긴 경로에 걸리는 경로인지 — 숨긴 폴더 자신과 그 아래 폴더가 걸린다.
+ * 등록 폴더 바로 아래(빈 글자)를 숨겼으면 그 줄만 걸린다
+ */
+export const isHiddenPath = (path: string, hiddenPaths: string[]): boolean =>
+  hiddenPaths.some(hidden =>
+    hidden === "" ? path === "" : path === hidden || path.startsWith(`${hidden}${PATH_SEPARATOR}`),
+  );
+
+/** 숨긴 경로에 걸리는 HTML 폴더를 뺀다 — 숨긴 것이 없으면 받은 배열을 그대로 돌려준다 */
+export const removeHiddenFolders = <THandle>(
+  htmlFolders: HtmlFolder<THandle>[],
+  hiddenPaths: string[],
+): HtmlFolder<THandle>[] =>
+  hiddenPaths.length === 0 ? htmlFolders : htmlFolders.filter(folder => !isHiddenPath(folder.path, hiddenPaths));
 
 /** 찾은 파일을 폴더별로 묶는다 — HTML 이 없는 폴더는 결과에 없다 */
 export const groupHtmlFiles = <THandle>(files: ScannedFile<THandle>[]): HtmlFolder<THandle>[] => {
