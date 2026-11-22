@@ -28,6 +28,7 @@ describe("useViewerStore", () => {
       selectedDocument: null,
       favorites: [],
       listView: "all",
+      isHelpOpen: false,
     });
   });
 
@@ -90,5 +91,14 @@ describe("useViewerStore", () => {
 
     useViewerStore.getState().toggleListView();
     expect(useViewerStore.getState().listView).toBe("all");
+  });
+
+  it("openHelp · closeHelp 로 도움말 창을 열고 닫으며, 열림은 기기에 기억하지 않는다", () => {
+    useViewerStore.getState().openHelp();
+    expect(useViewerStore.getState().isHelpOpen).toBe(true);
+    expect(readSaved().isHelpOpen).toBeUndefined();
+
+    useViewerStore.getState().closeHelp();
+    expect(useViewerStore.getState().isHelpOpen).toBe(false);
   });
 });

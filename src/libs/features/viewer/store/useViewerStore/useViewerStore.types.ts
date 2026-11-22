@@ -13,6 +13,8 @@ export interface ViewerState {
   favorites: FavoriteItem[];
   /** 목록 보기(전체 · 즐겨찾기만). 기기에 기억한다 */
   listView: ListView;
+  /** 도움말 창이 열려 있는지. 기억하지 않는다 — 다시 들어오면 닫혀 있다 */
+  isHelpOpen: boolean;
   /** 열기 · 접기 버튼 */
   toggleList: () => void;
   /** 목록 밖을 눌렀을 때 — 목록을 잠깐 닫는다 */
@@ -25,4 +27,7 @@ export interface ViewerState {
   removeFavoritesOfFolder: (folderId: string) => void;
   /** 전체 보기 ↔ 즐겨찾기만 보기 */
   toggleListView: () => void;
+  /** 도움말 창을 연다 (목록의 「?」 · 빈 화면 「사용 방법 보기」) */
+  openHelp: () => void;
+  closeHelp: () => void;
 }

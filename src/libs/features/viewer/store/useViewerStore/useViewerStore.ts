@@ -13,6 +13,7 @@ const useViewerStore = create<ViewerState>()(
       selectedDocument: null,
       favorites: [],
       listView: "all",
+      isHelpOpen: false,
       // 목록이 보이면 접고, 안 보이면(접혔거나 잠깐 닫혔으면) 연다
       toggleList: () =>
         set(state =>
@@ -32,6 +33,8 @@ const useViewerStore = create<ViewerState>()(
       removeFavoritesOfFolder: folderId =>
         set(state => ({ favorites: state.favorites.filter(favorite => favorite.folderId !== folderId) })),
       toggleListView: () => set(state => ({ listView: state.listView === "all" ? "favorites" : "all" })),
+      openHelp: () => set({ isHelpOpen: true }),
+      closeHelp: () => set({ isHelpOpen: false }),
     }),
     {
       name: VIEWER_STORAGE_KEY,
