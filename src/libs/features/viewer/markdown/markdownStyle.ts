@@ -26,6 +26,9 @@ body { margin: 0; background: #ffffff; /* bg-canvas */ }
 .md ul, .md ol { padding-left: 2.4rem; }
 .md li + li { margin-top: 0.4rem; }
 .md li > input[type="checkbox"] { margin: 0 0.8rem 0 0; pointer-events: none; }
+/* 할 일 목록 — 글머리 점 없이 체크 칸만 둔다. 들여쓰기는 문단과 거의 맞춘다 */
+.md ul:has(> li > input[type="checkbox"]) { padding-left: 0.4rem; }
+.md li:has(> input[type="checkbox"]) { list-style: none; }
 .md a { color: #047857; /* text-brand */ }
 .md hr { border: 0; border-top: 0.1rem solid #e4e4e7; /* border-default */ margin: 2.4rem 0; }
 .md img { max-width: 100%; }
