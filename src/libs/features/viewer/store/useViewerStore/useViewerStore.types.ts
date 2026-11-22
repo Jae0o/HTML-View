@@ -1,4 +1,4 @@
-import type { DocumentLocation } from "@libs/features/folder";
+import type { DocumentFormat, DocumentLocation } from "@libs/features/folder";
 
 import type { FavoriteItem, ListView } from "../../types";
 
@@ -13,6 +13,10 @@ export interface ViewerState {
   favorites: FavoriteItem[];
   /** 목록 보기(전체 · 즐겨찾기만). 기기에 기억한다 */
   listView: ListView;
+  /** 목록에 보일 문서 형식 — 늘 html · md 순서. 하나 이상 켜져 있다. 기기에 기억한다 (결정 MD-A2 · A4) */
+  visibleFormats: DocumentFormat[];
+  /** 새로고침 버튼을 누른 횟수 — 바뀌면 보던 문서를 다시 읽는다. 기억하지 않는다 */
+  reloadCount: number;
   /** 도움말 창이 열려 있는지. 기억하지 않는다 — 다시 들어오면 닫혀 있다 */
   isHelpOpen: boolean;
   /** 열기 · 접기 버튼 */
@@ -29,6 +33,11 @@ export interface ViewerState {
   removeFavoritesOfFolder: (folderId: string) => void;
   /** 전체 보기 ↔ 즐겨찾기만 보기 */
   toggleListView: () => void;
+  /** 형식 칩 — 켜고 끈다. 켜진 것이 그 하나뿐이면 끄지 않는다 */
+  toggleFormat: (format: DocumentFormat) => void;
+  /** 새로고침 — 보던 문서를 파일에서 다시 읽게 한다 (결정 MD-A15)
+   */
+  reloadDocument: () => void;
   /** 도움말 창을 연다 (목록의 「?」 · 빈 화면 「사용 방법 보기」) */
   openHelp: () => void;
   closeHelp: () => void;

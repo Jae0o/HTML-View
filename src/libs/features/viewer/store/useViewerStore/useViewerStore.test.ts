@@ -28,6 +28,8 @@ describe("useViewerStore", () => {
       selectedDocument: null,
       favorites: [],
       listView: "all",
+      visibleFormats: ["html", "md"],
+      reloadCount: 0,
       isHelpOpen: false,
     });
   });
@@ -50,7 +52,13 @@ describe("useViewerStore", () => {
     useViewerStore.getState().selectDocument(DOCUMENT);
 
     expect(useViewerStore.getState().isListDismissed).toBe(true);
-    expect(readSaved()).toEqual({ isListOpen: true, selectedDocument: DOCUMENT, favorites: [], listView: "all" });
+    expect(readSaved()).toEqual({
+      isListOpen: true,
+      selectedDocument: DOCUMENT,
+      favorites: [],
+      listView: "all",
+      visibleFormats: ["html", "md"],
+    });
   });
 
   it("closeDocument 는 보던 문서를 닫고 기기에서도 지운다", () => {
@@ -108,5 +116,35 @@ describe("useViewerStore", () => {
 
     useViewerStore.getState().closeHelp();
     expect(useViewerStore.getState().isHelpOpen).toBe(false);
+  });
+
+  it("형식은 처음에 둘 다 켜져 있고, 하나를 끄면 기기에 기억한다", () => {
+    expect(useViewerStore.getState().visibleFormats).toEqual(["html", "md"]);
+
+    useViewerStore.getState().toggleFormat("md");
+
+    expect(useViewerStore.getState().visibleFormats).toEqual(["html"]);
+    expect(readSaved().visibleFormats).toEqual(["html"]);
+  });
+
+  it("끈 형식을 다시 켜면 html · md 순서로 돌아온다", () => {
+    useViewerStore.getState().toggleFormat("html");
+    useViewerStore.getState().toggleFormat("html");
+
+    expect(useViewerStore.getState().visibleFormats).toEqual(["html", "md"]);
+  });
+
+  it("켜진 형식이 하나뿐이면 그 형식은 끄지 않는다", () => {
+    useViewerStore.getState().toggleFormat("html");
+    useViewerStore.getState().toggleFormat("md");
+
+    expect(useViewerStore.getState().visibleFormats).toEqual(["md"]);
+  });
+
+  it("reloadDocument 는 다시 읽기 횟수를 1 늘리고 기기에 기억하지 않는다", () => {
+    useViewerStore.getState().reloadDocument();
+
+    expect(useViewerStore.getState().reloadCount).toBe(1);
+    expect(readSaved().reloadCount).toBeUndefined();
   });
 });
