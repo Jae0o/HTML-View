@@ -22,6 +22,7 @@ const ViewerBody = () => {
   const selectedDocument = useViewerStore(state => state.selectedDocument);
   const isListVisible = useViewerStore(state => state.isListOpen && !state.isListDismissed);
   const toggleList = useViewerStore(state => state.toggleList);
+  const openHelp = useViewerStore(state => state.openHelp);
 
   const view = resolveBodyView({ isSupported: isFolderPickerSupported(), isRestored, folders, selectedDocument });
   const documentHtml = useDocumentHtml(view.kind === "document" ? view.document.handle : undefined);
@@ -33,6 +34,16 @@ const ViewerBody = () => {
 
   // 목록이 접혀 있을 때만 빈 화면에 목록 열기 버튼을 둔다
   const openListButton = !isListVisible && <Button onClick={toggleList}>목록 열기</Button>;
+
+  // 처음 쓰는 흐름(폴더 없음 · 문서 안 고름)에서만 도움말로 잇는다 — 결정 HP-A3
+  const helpButton = (
+    <Button
+      variant="text"
+      onClick={openHelp}
+    >
+      사용 방법 보기
+    </Button>
+  );
 
   if (view.kind === "unsupported") {
     return center(
@@ -50,13 +61,16 @@ const ViewerBody = () => {
         title="등록된 폴더가 없습니다"
         description="HTML 문서가 든 폴더를 추가하면 목록에 모아 보여 줍니다."
         actions={
-          <Button
-            variant="primary"
-            icon={<FolderPlusIcon />}
-            onClick={addFolder}
-          >
-            폴더 추가
-          </Button>
+          <>
+            <Button
+              variant="primary"
+              icon={<FolderPlusIcon />}
+              onClick={addFolder}
+            >
+              폴더 추가
+            </Button>
+            {helpButton}
+          </>
         }
       />,
     );
@@ -67,7 +81,12 @@ const ViewerBody = () => {
       <EmptyState
         title="선택된 문서가 없습니다"
         description="목록에서 문서를 고르면 여기에 열립니다."
-        actions={openListButton}
+        actions={
+          <>
+            {openListButton}
+            {helpButton}
+          </>
+        }
       />,
     );
   }

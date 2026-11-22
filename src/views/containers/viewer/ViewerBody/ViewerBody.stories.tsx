@@ -31,6 +31,10 @@ const meta: Meta<typeof ViewerBody> = {
   title: "viewer/containers/ViewerBody",
   component: ViewerBody,
   parameters: { layout: "fullscreen" },
+  // 「사용 방법 보기」 를 누르면 열림 상태만 남는다(이 스토리에는 도움말 창이 없다) — 스토리마다 닫아 둔다
+  beforeEach: () => {
+    useViewerStore.setState({ isHelpOpen: false });
+  },
   decorators: [
     Story => (
       <div className="h-screen">
