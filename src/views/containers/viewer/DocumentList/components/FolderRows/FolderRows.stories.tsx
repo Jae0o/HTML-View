@@ -32,7 +32,7 @@ const meta: Meta<typeof FolderRows> = {
     ),
   ],
   beforeEach: () => {
-    useViewerStore.setState({ selectedDocument: null, favorites: [] });
+    useViewerStore.setState({ selectedDocument: null, favorites: [], visibleFormats: ["html", "md"] });
   },
 };
 
@@ -46,8 +46,16 @@ export const Connected: Story = {};
 /** 숨긴 폴더가 있는 등록 폴더 — ⋯ 메뉴에 「숨긴 폴더」 가 생기고, 누르면 숨긴 폴더 창이 열린다 */
 export const WithHiddenFolders: Story = { args: { folder: { ...FOLDER, hiddenPaths: [".storybook", "done"] } } };
 
-/** HTML 문서가 없는 등록 폴더 */
+/** 문서가 없는 등록 폴더 */
 export const Empty: Story = { args: { folder: { ...FOLDER, htmlFolders: [] } } };
 
 /** 연결이 끊긴 등록 폴더 — 「다시 연결」 · 별 · ⋯ 만 눌린다 */
 export const Disconnected: Story = { args: { folder: { ...FOLDER, status: "disconnected", htmlFolders: [] } } };
+
+/** MD 만 켰는데 MD 문서가 없는 등록 폴더 — 빈 줄이 「MD 문서 없음」 이다 */
+export const EmptyMdOnly: Story = {
+  args: { folder: { ...FOLDER, htmlFolders: [] } },
+  beforeEach: () => {
+    useViewerStore.setState({ visibleFormats: ["md"] });
+  },
+};

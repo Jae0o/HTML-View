@@ -1,14 +1,14 @@
 import { useState } from "react";
 
 import { filterFolders, findDocument, isFolderPickerSupported, useFolderStore } from "@libs/features/folder";
-import { favoriteKey, resolveFavorites, useViewerStore } from "@libs/features/viewer";
+import { favoriteKey, filterFoldersByFormat, resolveFavorites, useViewerStore } from "@libs/features/viewer";
 
 import { FloatingSurface, IconButton, SearchInput, Tooltip } from "@views/components/common";
-import { FolderPlusIcon, HelpIcon, MenuIcon, StarIcon } from "@views/components/icons";
+import { FileHtmlIcon, FolderPlusIcon, HelpIcon, MarkdownIcon, MenuIcon, StarIcon } from "@views/components/icons";
 import { SectionHeader } from "@views/components/viewer";
 
 import { favoriteLabel, filterFavorites } from "./DocumentList.utils";
-import { DocumentRow, FolderRows, HtmlFolderRows } from "./components";
+import { DocumentRow, FilterChip, FolderRows, HtmlFolderRows } from "./components";
 import { useClickAway } from "./hooks";
 
 // 목록 상자 — 닫혀 있을 때는 지우지 않고 감추기만 한다(줄의 펼침 상태가 남는다).
@@ -36,6 +36,10 @@ const DocumentList = () => {
   const favorites = useViewerStore(state => state.favorites);
   const isFavoritesView = useViewerStore(state => state.listView === "favorites");
   const toggleListView = useViewerStore(state => state.toggleListView);
+  const visibleFormats = useViewerStore(state => state.visibleFormats);
+  const toggleFormat = useViewerStore(state => state.toggleFormat);
+  const isHtmlVisible = visibleFormats.includes("html");
+  const isMdVisible = visibleFormats.includes("md");
   const isHelpOpen = useViewerStore(state => state.isHelpOpen);
   const openHelp = useViewerStore(state => state.openHelp);
   const isRestored = useFolderStore(state => state.isRestored);
@@ -52,9 +56,11 @@ const DocumentList = () => {
   // 검색어는 기억하지 않는다 — 입력하는 대로 목록을 거른다
   const [query, setQuery] = useState("");
   const isSearching = query.trim() !== "";
+  // 꺼진 형식의 문서를 먼저 뺀다 — 검색 · 즐겨찾기는 이 목록 하나로 거른다 (결정 MD-A3)
+  const visibleFolders = filterFoldersByFormat(folders, visibleFormats);
   // 검색 칸은 보기를 따라간다 — 전체 보기에서는 폴더 · 문서 이름을, 즐겨찾기 보기에서는 즐겨찾기 이름을 거른다
-  const matches = isFavoritesView ? [] : filterFolders(folders, query);
-  const visibleFavorites = isFavoritesView ? filterFavorites(resolveFavorites(favorites, folders), query) : [];
+  const matches = isFavoritesView ? [] : filterFolders(visibleFolders, query);
+  const visibleFavorites = isFavoritesView ? filterFavorites(resolveFavorites(favorites, visibleFolders), query) : [];
   const searchLabel = isFavoritesView ? "즐겨찾기 검색" : "폴더 · 문서 검색";
   const isEmpty = isFavoritesView ? visibleFavorites.length === 0 : matches.length === 0;
 
@@ -118,15 +124,37 @@ const DocumentList = () => {
             onChange={event => setQuery(event.target.value)}
             className="flex-1"
           />
-          <Tooltip label={isFavoritesView ? "전체 보기" : "즐겨찾기만 보기"}>
-            <IconButton
-              variant="ghost"
-              aria-label="즐겨찾기만 보기"
-              pressed={isFavoritesView}
-              icon={<StarIcon fill={isFavoritesView ? "currentColor" : "none"} />}
-              onClick={toggleListView}
-            />
-          </Tooltip>
+        </div>
+
+        {/* 목록 위 칩 — 즐겨찾기만 보기 · 보일 형식 (결정 MD-A1). 켜진 형식이 하나뿐이면 그 칩은 끌 수 없다 (MD-A2) */}
+        <div className="flex flex-wrap gap-8">
+          <FilterChip
+            label="즐겨찾기"
+            pressed={isFavoritesView}
+            icon={
+              <span className={isFavoritesView ? "inline-flex text-favorite-on" : "inline-flex"}>
+                <StarIcon
+                  size={16}
+                  fill={isFavoritesView ? "currentColor" : "none"}
+                />
+              </span>
+            }
+            onClick={toggleListView}
+          />
+          <FilterChip
+            label="HTML"
+            pressed={isHtmlVisible}
+            disabled={isHtmlVisible && visibleFormats.length === 1}
+            icon={<FileHtmlIcon size={16} />}
+            onClick={() => toggleFormat("html")}
+          />
+          <FilterChip
+            label="MD"
+            pressed={isMdVisible}
+            disabled={isMdVisible && visibleFormats.length === 1}
+            icon={<MarkdownIcon size={16} />}
+            onClick={() => toggleFormat("md")}
+          />
         </div>
 
         {isFavoritesView ? (

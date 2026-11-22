@@ -7,7 +7,7 @@ import { BrandLogo, Button, ConfirmDialog, TextInput } from "@views/components/c
 import { FolderIcon } from "@views/components/icons";
 import { TreeRow } from "@views/components/viewer";
 
-import { ROOT_FOLDER_LABEL } from "../../DocumentList.constants";
+import { EMPTY_FOLDER_LABEL, ROOT_FOLDER_LABEL } from "../../DocumentList.constants";
 import { Collapse } from "../Collapse";
 import { FavoriteButton } from "../FavoriteButton";
 import { HiddenFoldersDialog } from "../HiddenFoldersDialog";
@@ -31,6 +31,10 @@ const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PAT
   const renameFolder = useFolderStore(state => state.renameFolder);
   const showPath = useFolderStore(state => state.showPath);
   const removeFavoritesOfFolder = useViewerStore(state => state.removeFavoritesOfFolder);
+  // 보일 문서가 없을 때의 문구는 켜진 형식을 따른다 — 목록은 이미 그 형식으로 거른 등록 폴더를 받는다
+  const emptyLabel = useViewerStore(state =>
+    state.visibleFormats.length === 2 ? EMPTY_FOLDER_LABEL.all : EMPTY_FOLDER_LABEL[state.visibleFormats[0]],
+  );
 
   // 등록 폴더는 처음에 펼쳐 있다
   const [isExpanded, setIsExpanded] = useState(true);
@@ -99,7 +103,7 @@ const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PAT
       {/* 접어도 안쪽 줄을 지우지 않는다 — HTML 폴더를 펼쳐 둔 상태가 남는다 */}
       <Collapse open={isOpen}>
         {folder.htmlFolders.length === 0 && (
-          <p className="m-0 flex h-32 items-center pl-24 text-sm text-text-tertiary">HTML 문서 없음</p>
+          <p className="m-0 flex h-32 items-center pl-24 text-sm text-text-tertiary">{emptyLabel}</p>
         )}
         {folder.htmlFolders.map(htmlFolder => (
           <HtmlFolderRows

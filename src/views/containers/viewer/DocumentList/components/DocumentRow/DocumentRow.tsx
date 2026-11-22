@@ -1,7 +1,7 @@
-import type { DocumentEntry } from "@libs/features/folder";
+import { type DocumentEntry, documentFormatOf } from "@libs/features/folder";
 import { useViewerStore } from "@libs/features/viewer";
 
-import { FileHtmlIcon } from "@views/components/icons";
+import { FileHtmlIcon, MarkdownIcon } from "@views/components/icons";
 import { TreeRow, type TreeRowDepth } from "@views/components/viewer";
 
 import { FavoriteButton } from "../FavoriteButton";
@@ -23,12 +23,25 @@ const DocumentRow = ({ folderId, path, document, depth }: DocumentRowProps) => {
       state.selectedDocument.fileName === document.fileName,
   );
   const selectDocument = useViewerStore(state => state.selectDocument);
+  const iconClass = isSelected ? "shrink-0" : "shrink-0 text-text-tertiary";
 
   return (
     <TreeRow
       depth={depth}
       label={document.name}
-      icon={<FileHtmlIcon className={isSelected ? "shrink-0" : "shrink-0 text-text-tertiary"} />}
+      icon={
+        documentFormatOf(document.fileName) === "md" ? (
+          <MarkdownIcon
+            size={20}
+            className={iconClass}
+          />
+        ) : (
+          <FileHtmlIcon
+            size={20}
+            className={iconClass}
+          />
+        )
+      }
       selected={isSelected}
       actions={<FavoriteButton item={{ kind: "document", folderId, path, fileName: document.fileName }} />}
       onClick={() => selectDocument({ folderId, path, fileName: document.fileName })}

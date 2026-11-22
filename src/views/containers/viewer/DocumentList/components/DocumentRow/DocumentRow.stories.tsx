@@ -38,3 +38,8 @@ export const Selected: Story = {
     useViewerStore.setState({ selectedDocument: { folderId: "sample", path: "plan-a", fileName: "구현 분석.html" } });
   },
 };
+
+/** MD 문서 — 앞 아이콘이 MD 아이콘이다 */
+export const Markdown: Story = {
+  args: { document: { name: "README", fileName: "README.md", handle: {} as FileSystemFileHandle } },
+};

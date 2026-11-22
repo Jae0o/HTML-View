@@ -7,6 +7,7 @@ import DocumentList from "./DocumentList";
 
 // 스토리용 등록 폴더 — 폴더 연결(handle)은 실제 폴더 이름만 쓴다(이름 변경 입력 칸을 비우면 보이는 글자)
 const document = (name: string) => ({ name, fileName: `${name}.html`, handle: {} as FileSystemFileHandle });
+const mdDocument = (name: string) => ({ name, fileName: `${name}.md`, handle: {} as FileSystemFileHandle });
 
 const FOLDERS = [
   {
@@ -16,7 +17,11 @@ const FOLDERS = [
     status: "connected",
     htmlFolders: [
       { path: "", documents: [document("개요")] },
-      { path: "001-create-side-menu", documents: [document("구현 분석"), document("플랜")] },
+      {
+        path: "001-create-side-menu",
+        documents: [document("구현 분석"), mdDocument("구현 분석.ai"), document("플랜")],
+      },
+      { path: ".claude / docs", documents: [mdDocument("README")] },
       {
         path: "003-refactor-side-menu-with-a-very-long-folder-name-for-truncation / completed",
         documents: [document("결과 보고")],
@@ -61,6 +66,7 @@ const meta: Meta<typeof DocumentList> = {
       selectedDocument: null,
       favorites: [],
       listView: "all",
+      visibleFormats: ["html", "md"],
       // 「?」 를 누르면 열림 상태만 남는다(이 스토리에는 도움말 창이 없다) — 스토리마다 닫아 둔다
       isHelpOpen: false,
     });
@@ -127,5 +133,19 @@ export const FavoritesView: Story = {
 export const FavoritesViewEmpty: Story = {
   beforeEach: () => {
     useViewerStore.setState({ listView: "favorites", favorites: [] });
+  },
+};
+
+/** MD 만 — HTML 칩을 끄면 HTML 만 든 폴더 줄이 빠지고, MD 칩은 끌 수 없어 흐리다 */
+export const MdOnly: Story = {
+  beforeEach: () => {
+    useViewerStore.setState({ visibleFormats: ["md"] });
+  },
+};
+
+/** HTML 만 — MD 칩을 끄면 HTML 칩은 끌 수 없어 흐리다 */
+export const HtmlOnly: Story = {
+  beforeEach: () => {
+    useViewerStore.setState({ visibleFormats: ["html"] });
   },
 };
