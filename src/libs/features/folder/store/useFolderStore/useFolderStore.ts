@@ -9,6 +9,7 @@ import {
   removeHiddenFolders,
   renameFolderRecord,
   scanFolder,
+  writeFolderOrder,
   writeFolderRecord,
   writeHiddenPaths,
 } from "../../utils";
@@ -162,6 +163,28 @@ const useFolderStore = create<FolderState>((set, get) => ({
       }));
     } catch {
       useToastStore.getState().show(FOLDER_MESSAGE.renameFailed);
+    }
+  },
+
+  moveFolder: async (id, toIndex) => {
+    const previous = get().folders;
+    const fromIndex = previous.findIndex(folder => folder.id === id);
+    if (fromIndex === -1 || fromIndex === toIndex) return;
+
+    const folders = previous.toSpliced(fromIndex, 1).toSpliced(toIndex, 0, previous[fromIndex]);
+
+    // 끌어 놓은 자리에 바로 보이게 먼저 바꾼다
+    set({ folders });
+
+    try {
+      await writeFolderOrder(folders.map(folder => folder.id));
+    } catch {
+      // 원래 순서로 되돌린다 — 저장하는 동안 다시 훑어 바뀐 폴더는 지금 것을 쓰고, 그사이 새로 등록한 폴더는 맨 끝에 둔다
+      const previousIndex = new Map(previous.map((folder, index) => [folder.id, index]));
+      const rank = (folder: RegisteredFolder) => previousIndex.get(folder.id) ?? previous.length;
+
+      set(state => ({ folders: state.folders.toSorted((a, b) => rank(a) - rank(b)) }));
+      useToastStore.getState().show(FOLDER_MESSAGE.moveFailed);
     }
   },
 

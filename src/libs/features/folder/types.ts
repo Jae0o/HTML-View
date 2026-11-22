@@ -54,8 +54,13 @@ export interface FolderRecord {
   id: string;
   name: string;
   handle: FileSystemDirectoryHandle;
-  /** 등록한 때 (목록 순서) */
+  /** 등록한 때 — 순서를 바꾼 적 없는 기록은 이 값으로 줄 세운다 */
   addedAt: number;
+  /**
+   * 목록 순서 (0 부터). 순서를 바꾸면 모든 기록에 쓴다. 순서를 바꾸기 전에 저장한 기록 · 그 뒤 새로 등록한 기록에는 없다 —
+   * 없으면 addedAt 으로 줄 세운다. addedAt(밀리초 시각)은 순서 값보다 늘 커서 새로 등록한 폴더는 맨 끝에 온다
+   */
+  order?: number;
   /** 목록에서 숨긴 폴더의 경로. 숨기기가 생기기 전에 저장한 기록에는 없다 — 없으면 숨긴 것이 없다 */
   hiddenPaths?: string[];
 }

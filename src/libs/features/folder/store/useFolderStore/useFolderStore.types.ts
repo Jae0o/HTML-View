@@ -18,6 +18,11 @@ export interface FolderState {
    */
   renameFolder: (id: string, name: string) => Promise<void>;
   /**
+   * 등록 폴더 하나를 목록의 다른 자리로 옮긴다 — toIndex 는 옮긴 뒤 그 폴더의 자리(0 부터).
+   * 목록을 바로 바꾸고 기기에 순서를 저장한다. 저장하지 못하면 원래 순서로 되돌리고 알린다
+   */
+  moveFolder: (id: string, toIndex: number) => Promise<void>;
+  /**
    * 등록 폴더 안의 폴더 하나를 목록에서 숨긴다 — 그 폴더와 아래 폴더가 빠지고, 기기에 기억한다. 숨겼으면 true.
    * 실제 폴더 · 파일은 건드리지 않는다
    */

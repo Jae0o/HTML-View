@@ -6,6 +6,7 @@ import {
   readFolderRecords,
   renameFolderRecord,
   scanFolder,
+  writeFolderOrder,
   writeFolderRecord,
   writeHiddenPaths,
 } from "../../utils";
@@ -21,6 +22,7 @@ vi.mock("../../utils/folderDb", () => ({
   deleteFolderRecord: vi.fn(),
   renameFolderRecord: vi.fn(),
   writeHiddenPaths: vi.fn(),
+  writeFolderOrder: vi.fn(),
 }));
 vi.mock("../../utils/scanFolder", () => ({ scanFolder: vi.fn() }));
 
@@ -70,6 +72,7 @@ describe("useFolderStore", () => {
     vi.mocked(deleteFolderRecord).mockResolvedValue();
     vi.mocked(renameFolderRecord).mockResolvedValue();
     vi.mocked(writeHiddenPaths).mockResolvedValue();
+    vi.mocked(writeFolderOrder).mockResolvedValue();
     useFolderStore.setState({ folders: [], isRestored: false });
     useToastStore.getState().hide();
   });
@@ -222,6 +225,53 @@ describe("useFolderStore", () => {
 
     expect(useFolderStore.getState().folders[0].name).toBe("docs");
     expect(useToastStore.getState().message).toBe(FOLDER_MESSAGE.renameFailed);
+  });
+
+  it("moveFolder 는 폴더를 옮긴 자리로 바꾸고 새 순서를 기기에 저장한다", async () => {
+    useFolderStore.setState({
+      folders: [
+        asFolder("a", fakeHandle("a"), "connected"),
+        asFolder("b", fakeHandle("b"), "connected"),
+        asFolder("c", fakeHandle("c"), "disconnected"),
+      ],
+    });
+
+    await useFolderStore.getState().moveFolder("a", 2);
+
+    expect(useFolderStore.getState().folders.map(folder => folder.id)).toEqual(["b", "c", "a"]);
+    expect(writeFolderOrder).toHaveBeenCalledWith(["b", "c", "a"]);
+
+    await useFolderStore.getState().moveFolder("a", 0);
+
+    expect(useFolderStore.getState().folders.map(folder => folder.id)).toEqual(["a", "b", "c"]);
+  });
+
+  it("moveFolder 에 지금 자리 · 없는 폴더를 주면 저장하지 않는다", async () => {
+    const folders = [asFolder("a", fakeHandle("a"), "connected"), asFolder("b", fakeHandle("b"), "connected")];
+
+    useFolderStore.setState({ folders });
+
+    await useFolderStore.getState().moveFolder("b", 1);
+    await useFolderStore.getState().moveFolder("x", 0);
+
+    expect(useFolderStore.getState().folders).toBe(folders);
+    expect(writeFolderOrder).not.toHaveBeenCalled();
+  });
+
+  it("moveFolder 가 기기에 저장하지 못하면 원래 순서로 되돌리고 알린다", async () => {
+    vi.mocked(writeFolderOrder).mockRejectedValue(new Error("저장 실패"));
+    useFolderStore.setState({
+      folders: [
+        asFolder("a", fakeHandle("a"), "connected"),
+        asFolder("b", fakeHandle("b"), "connected"),
+        asFolder("c", fakeHandle("c"), "connected"),
+      ],
+    });
+
+    await useFolderStore.getState().moveFolder("c", 0);
+
+    expect(useFolderStore.getState().folders.map(folder => folder.id)).toEqual(["a", "b", "c"]);
+    expect(useToastStore.getState().message).toBe(FOLDER_MESSAGE.moveFailed);
   });
 
   it("refreshFolder 는 숨긴 폴더를 빼고 보여 준다", async () => {

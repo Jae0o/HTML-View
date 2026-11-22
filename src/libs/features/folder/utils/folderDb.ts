@@ -16,7 +16,7 @@ const openDb = (): Promise<IDBDatabase> =>
     request.onerror = () => reject(request.error);
   });
 
-/** 기기에 저장된 등록 폴더 — 등록한 순서 */
+/** 기기에 저장된 등록 폴더 — 목록 순서 (order, 없으면 addedAt) */
 export const readFolderRecords = async (): Promise<FolderRecord[]> => {
   const db = await openDb();
 
@@ -24,7 +24,8 @@ export const readFolderRecords = async (): Promise<FolderRecord[]> => {
     return await new Promise((resolve, reject) => {
       const request = db.transaction(STORE_NAME).objectStore(STORE_NAME).getAll();
 
-      request.onsuccess = () => resolve((request.result as FolderRecord[]).toSorted((a, b) => a.addedAt - b.addedAt));
+      request.onsuccess = () =>
+        resolve((request.result as FolderRecord[]).toSorted((a, b) => (a.order ?? a.addedAt) - (b.order ?? b.addedAt)));
       request.onerror = () => reject(request.error);
     });
   } finally {
@@ -84,6 +85,31 @@ export const writeHiddenPaths = async (id: string, hiddenPaths: string[]): Promi
       request.onsuccess = () => {
         if (request.result) store.put({ ...(request.result as FolderRecord), hiddenPaths });
       };
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
+    });
+  } finally {
+    db.close();
+  }
+};
+
+/** 등록 폴더의 목록 순서를 받은 id 순서대로 기록마다 쓴다 — 한 번에 한다. 없는 id 는 건너뛴다 */
+export const writeFolderOrder = async (ids: string[]): Promise<void> => {
+  const db = await openDb();
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, "readwrite");
+      const store = transaction.objectStore(STORE_NAME);
+
+      ids.forEach((id, order) => {
+        const request = store.get(id);
+
+        request.onsuccess = () => {
+          if (request.result) store.put({ ...(request.result as FolderRecord), order });
+        };
+      });
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);
       transaction.onabort = () => reject(transaction.error);
