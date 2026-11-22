@@ -8,7 +8,7 @@ import { FileHtmlIcon, FolderPlusIcon, HelpIcon, MarkdownIcon, MenuIcon, StarIco
 import { SectionHeader } from "@views/components/viewer";
 
 import { favoriteLabel, filterFavorites } from "./DocumentList.utils";
-import { DocumentRow, FilterChip, FolderRows, HtmlFolderRows } from "./components";
+import { DocumentRow, FilterChip, FolderRows, HtmlFolderRows, SortableFolderRows } from "./components";
 import { useClickAway } from "./hooks";
 
 // 목록 상자 — 닫혀 있을 때는 지우지 않고 감추기만 한다(줄의 펼침 상태가 남는다).
@@ -176,14 +176,11 @@ const DocumentList = () => {
         )}
 
         <div className="flex min-h-0 flex-col overflow-y-auto">
-          {matches.map(({ folder, documentMatchedPaths }) => (
-            <FolderRows
-              key={folder.id}
-              folder={folder}
-              forceExpanded={isSearching}
-              forceExpandedPaths={documentMatchedPaths}
-            />
-          ))}
+          {/* 등록 폴더 줄을 끌어 순서를 바꾼다 — 검색 중에는 끌지 못한다 */}
+          <SortableFolderRows
+            matches={matches}
+            isSearching={isSearching}
+          />
 
           {/* 즐겨찾기 보기 — 켠 순서대로. 등록 폴더 · HTML 폴더는 펼쳐서 안쪽 문서까지 볼 수 있다 */}
           {visibleFavorites.map(favorite => {

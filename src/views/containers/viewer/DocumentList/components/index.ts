@@ -7,3 +7,4 @@ export * from "./HiddenFoldersDialog";
 export * from "./HidePathDialog";
 export * from "./HtmlFolderRows";
 export * from "./MoreMenu";
+export * from "./SortableFolderRows";

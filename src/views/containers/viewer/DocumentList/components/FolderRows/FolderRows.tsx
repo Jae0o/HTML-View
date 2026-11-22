@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type DragEvent, useState } from "react";
 
 import { type RegisteredFolder, useFolderStore } from "@libs/features/folder";
 import { useViewerStore } from "@libs/features/viewer";
@@ -20,12 +20,22 @@ interface FolderRowsProps {
   forceExpanded?: boolean;
   /** 검색에서 문서 이름이 맞은 HTML 폴더의 경로 — 그 폴더는 펼쳐서 보여 준다 */
   forceExpandedPaths?: string[];
+  /** 등록 폴더 줄을 끌기 시작할 때 — 주면 줄을 끌 수 있다 (안쪽 줄은 끌리지 않는다) */
+  onDragStart?: (e: DragEvent<HTMLDivElement>) => void;
+  /** 끌기가 끝났을 때 — 놓았든 취소했든 불린다 */
+  onDragEnd?: () => void;
 }
 
 const NO_PATHS: string[] = [];
 
 /** 등록 폴더 한 줄과 그 안의 HTML 폴더 줄들. 줄 오른쪽 끝 ⋯ 메뉴의 「이름 변경」 입력 창 · 「숨긴 폴더」 창 · 「등록 해제」 확인 창도 여기서 띄운다 */
-const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PATHS }: FolderRowsProps) => {
+const FolderRows = ({
+  folder,
+  forceExpanded = false,
+  forceExpandedPaths = NO_PATHS,
+  onDragStart,
+  onDragEnd,
+}: FolderRowsProps) => {
   const reconnect = useFolderStore(state => state.reconnect);
   const removeFolder = useFolderStore(state => state.removeFolder);
   const renameFolder = useFolderStore(state => state.renameFolder);
@@ -71,34 +81,41 @@ const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PAT
 
   return (
     <>
-      <TreeRow
-        depth={0}
-        label={folder.name}
-        icon={<FolderIcon className={isConnected ? "shrink-0 text-brand-bg" : "shrink-0 text-text-tertiary"} />}
-        expanded={isConnected ? isOpen : undefined}
-        actions={
-          <>
-            {!isConnected && (
-              <Button
-                variant="text"
-                onClick={() => reconnect(folder.id)}
-              >
-                다시 연결
-              </Button>
-            )}
-            <FavoriteButton item={{ kind: "folder", folderId: folder.id }} />
-            <MoreMenu
-              items={[
-                { label: "이름 변경", onSelect: openRename },
-                // 숨긴 폴더가 있을 때만 보인다
-                ...(hasHidden ? [{ label: "숨긴 폴더", onSelect: () => setIsHiddenOpen(true) }] : []),
-                { label: "등록 해제", onSelect: () => setIsRemoveOpen(true) },
-              ]}
-            />
-          </>
-        }
-        onClick={isConnected && !forceExpanded ? () => setIsExpanded(previous => !previous) : undefined}
-      />
+      {/* 끌 수 있는 것은 등록 폴더 줄뿐이다 — 끄는 동안 보이는 모습도 이 줄이다 */}
+      <div
+        draggable={onDragStart ? true : undefined}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+      >
+        <TreeRow
+          depth={0}
+          label={folder.name}
+          icon={<FolderIcon className={isConnected ? "shrink-0 text-brand-bg" : "shrink-0 text-text-tertiary"} />}
+          expanded={isConnected ? isOpen : undefined}
+          actions={
+            <>
+              {!isConnected && (
+                <Button
+                  variant="text"
+                  onClick={() => reconnect(folder.id)}
+                >
+                  다시 연결
+                </Button>
+              )}
+              <FavoriteButton item={{ kind: "folder", folderId: folder.id }} />
+              <MoreMenu
+                items={[
+                  { label: "이름 변경", onSelect: openRename },
+                  // 숨긴 폴더가 있을 때만 보인다
+                  ...(hasHidden ? [{ label: "숨긴 폴더", onSelect: () => setIsHiddenOpen(true) }] : []),
+                  { label: "등록 해제", onSelect: () => setIsRemoveOpen(true) },
+                ]}
+              />
+            </>
+          }
+          onClick={isConnected && !forceExpanded ? () => setIsExpanded(previous => !previous) : undefined}
+        />
+      </div>
 
       {/* 접어도 안쪽 줄을 지우지 않는다 — HTML 폴더를 펼쳐 둔 상태가 남는다 */}
       <Collapse open={isOpen}>
