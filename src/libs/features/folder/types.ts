@@ -1,3 +1,6 @@
+/** 문서 형식 — html HTML 문서 · md 마크다운 문서. 파일 이름 끝으로 정한다 (documentFormatOf) */
+export type DocumentFormat = "html" | "md";
+
 /** 문서 한 개 */
 export interface DocumentEntry<THandle = FileSystemFileHandle> {
   /** 화면에 보이는 이름 — 확장자를 뺀 파일 이름 */
@@ -7,7 +10,7 @@ export interface DocumentEntry<THandle = FileSystemFileHandle> {
   handle: THandle;
 }
 
-/** HTML 문서가 든 폴더 한 개 — 목록의 둘째 단 */
+/** 문서(HTML · MD)가 든 폴더 한 개 — 목록의 둘째 단. 이름은 HTML 만 다루던 때 그대로 둔다 */
 export interface HtmlFolder<THandle = FileSystemFileHandle> {
   /** 등록 폴더 아래 경로 (예: 플랜명 / completed). 등록 폴더 바로 아래면 빈 글자 */
   path: string;

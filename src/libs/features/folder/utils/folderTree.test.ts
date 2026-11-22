@@ -1,11 +1,11 @@
 import type { HtmlFolder, RegisteredFolder } from "../types";
 import {
+  documentFormatOf,
   filterFolders,
   findDocument,
   groupHtmlFiles,
   isExcludedDirectory,
   isHiddenPath,
-  isHtmlFile,
   joinPath,
   mergeHtmlFolders,
   removeHiddenFolders,
@@ -60,16 +60,24 @@ describe("removeHiddenFolders", () => {
   });
 });
 
-describe("isHtmlFile", () => {
-  it("html · htm 확장자를 대소문자 가리지 않고 받는다", () => {
-    expect(isHtmlFile("기획.html")).toBe(true);
-    expect(isHtmlFile("INDEX.HTM")).toBe(true);
-    expect(isHtmlFile("기획.ai.md")).toBe(false);
+describe("documentFormatOf", () => {
+  it("html · htm 은 HTML, md · markdown 은 MD 로 대소문자 가리지 않고 받는다", () => {
+    expect(documentFormatOf("기획.html")).toBe("html");
+    expect(documentFormatOf("INDEX.HTM")).toBe("html");
+    expect(documentFormatOf("기획.ai.md")).toBe("md");
+    expect(documentFormatOf("README.MD")).toBe("md");
+    expect(documentFormatOf("notes.markdown")).toBe("md");
+  });
+
+  it("그 밖의 파일은 문서가 아니다", () => {
+    expect(documentFormatOf("page.mdx")).toBeNull();
+    expect(documentFormatOf("메모.txt")).toBeNull();
+    expect(documentFormatOf("md")).toBeNull();
   });
 });
 
 describe("groupHtmlFiles", () => {
-  it("HTML 이 든 폴더만 남기고 경로를 「 / 」 로 잇는다", () => {
+  it("HTML · MD 가 든 폴더만 남기고 경로를 「 / 」 로 잇는다", () => {
     const folders = groupHtmlFiles([
       file(["plan-a", "completed"], "결과.html"),
       file(["plan-a"], "README.md"),
@@ -77,7 +85,22 @@ describe("groupHtmlFiles", () => {
     ]);
 
     expect(folders).toEqual([
+      { path: "plan-a", documents: [{ name: "README", fileName: "README.md", handle: "README.md" }] },
       { path: "plan-a / completed", documents: [{ name: "결과", fileName: "결과.html", handle: "결과.html" }] },
+    ]);
+  });
+
+  it("MD 만 든 폴더도 남고, 같은 이름의 HTML · MD 는 파일 이름으로 따로 남는다", () => {
+    const [folder] = groupHtmlFiles([
+      file(["plan"], "기획.html"),
+      file(["plan"], "기획.ai.md"),
+      file(["plan"], "기획.md"),
+    ]);
+
+    expect(folder.documents.map(document => [document.name, document.fileName])).toEqual([
+      ["기획.ai", "기획.ai.md"],
+      ["기획", "기획.html"],
+      ["기획", "기획.md"],
     ]);
   });
 

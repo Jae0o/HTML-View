@@ -1,9 +1,19 @@
-import type { DocumentEntry, DocumentLocation, FolderMatch, HtmlFolder, RegisteredFolder, ScannedFile } from "../types";
+import type {
+  DocumentEntry,
+  DocumentFormat,
+  DocumentLocation,
+  FolderMatch,
+  HtmlFolder,
+  RegisteredFolder,
+  ScannedFile,
+} from "../types";
 
 /** 경로를 이어 붙이는 글자 — 플랜명 / completed */
 const PATH_SEPARATOR = " / ";
 
+// 목록에 넣는 문서의 확장자 — 대소문자를 가리지 않는다 (결정 MD-A5)
 const HTML_EXTENSION = /\.html?$/i;
+const MD_EXTENSION = /\.(md|markdown)$/i;
 
 // 이름순 — 숫자는 크기순(2 가 10 보다 앞), 대소문자를 가리지 않는다
 const collator = new Intl.Collator("ko", { numeric: true, sensitivity: "base" });
@@ -14,7 +24,13 @@ const EXCLUDED_DIRECTORIES = new Set([".git", ".venv", "node_modules"]);
 /** 훑지 않는 폴더인지 — 이름이 정해 둔 목록에 있을 때만 (.git · .venv · node_modules) */
 export const isExcludedDirectory = (name: string): boolean => EXCLUDED_DIRECTORIES.has(name);
 
-export const isHtmlFile = (fileName: string): boolean => HTML_EXTENSION.test(fileName);
+/** 파일 이름 끝으로 문서 형식을 정한다 — html · htm 은 HTML, md · markdown 은 MD, 그 밖은 문서가 아니다(null) */
+export const documentFormatOf = (fileName: string): DocumentFormat | null => {
+  if (HTML_EXTENSION.test(fileName)) return "html";
+  if (MD_EXTENSION.test(fileName)) return "md";
+
+  return null;
+};
 
 /** 경로를 폴더 이름들로 나눈다 — 등록 폴더 바로 아래(빈 글자)는 빈 배열 */
 export const splitPath = (path: string): string[] => (path ? path.split(PATH_SEPARATOR) : []);
@@ -38,17 +54,22 @@ export const removeHiddenFolders = <THandle>(
 ): HtmlFolder<THandle>[] =>
   hiddenPaths.length === 0 ? htmlFolders : htmlFolders.filter(folder => !isHiddenPath(folder.path, hiddenPaths));
 
-/** 찾은 파일을 폴더별로 묶는다 — HTML 이 없는 폴더는 결과에 없다 */
+/** 찾은 파일을 폴더별로 묶는다 — 문서(HTML · MD)가 없는 폴더는 결과에 없다 */
 export const groupHtmlFiles = <THandle>(files: ScannedFile<THandle>[]): HtmlFolder<THandle>[] => {
   const byPath = new Map<string, HtmlFolder<THandle>>();
 
   for (const { directories, fileName, handle } of files) {
-    if (!isHtmlFile(fileName)) continue;
+    const format = documentFormatOf(fileName);
+    if (!format) continue;
 
     const path = directories.join(PATH_SEPARATOR);
     const folder = byPath.get(path) ?? { path, documents: [] };
 
-    folder.documents.push({ name: fileName.replace(HTML_EXTENSION, ""), fileName, handle });
+    folder.documents.push({
+      name: fileName.replace(format === "html" ? HTML_EXTENSION : MD_EXTENSION, ""),
+      fileName,
+      handle,
+    });
     byPath.set(path, folder);
   }
 
