@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { ChevronRightIcon } from "./ChevronRightIcon";
 import { CloseIcon } from "./CloseIcon";
+import { CopyIcon } from "./CopyIcon";
 import { DownloadIcon } from "./DownloadIcon";
 import { FileHtmlIcon } from "./FileHtmlIcon";
 import { FolderIcon } from "./FolderIcon";
@@ -18,6 +19,7 @@ import { StarIcon } from "./StarIcon";
 const ICONS = [
   { name: "ChevronRightIcon", icon: <ChevronRightIcon size={16} /> },
   { name: "CloseIcon", icon: <CloseIcon size={16} /> },
+  { name: "CopyIcon", icon: <CopyIcon size={16} /> },
   { name: "DownloadIcon", icon: <DownloadIcon size={16} /> },
   { name: "FileHtmlIcon", icon: <FileHtmlIcon size={20} /> },
   { name: "FolderIcon", icon: <FolderIcon size={20} /> },
