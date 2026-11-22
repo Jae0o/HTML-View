@@ -41,10 +41,11 @@ const TreeRow = ({ depth, icon, label, expanded, selected = false, trailing, act
     {(expanded !== undefined || icon) && (
       <div className="flex h-20 shrink-0 items-center gap-8">
         {expanded !== undefined && (
+          // 돌린 화살표(transform)는 줄 버튼 위 층에 그려져 누름을 가로챈다 — 마우스를 통과시켜 줄 버튼이 받게 한다
           <ChevronRightIcon
             size={16}
             className={clsx(
-              "shrink-0 text-text-tertiary transition-transform duration-200 motion-reduce:transition-none",
+              "pointer-events-none shrink-0 text-text-tertiary transition-transform duration-200 motion-reduce:transition-none",
               expanded && "rotate-90",
             )}
           />
