@@ -5,12 +5,18 @@ import { resolveBodyView, withLinkGuard } from "./ViewerBody.utils";
 import { describe, expect, it } from "vitest";
 
 describe("withLinkGuard", () => {
-  it("문서 내용은 그대로 두고 맨 뒤에 스크립트 하나를 붙인다", () => {
+  it("문서 내용은 그대로 두고 맨 뒤에 링크 지킴 · 스크롤 보고 스크립트를 붙인다", () => {
     const html = "<h1>문서</h1>";
     const guarded = withLinkGuard(html);
 
     expect(guarded.startsWith(html)).toBe(true);
-    expect(guarded.slice(html.length)).toMatch(/^<script>.*<\/script>$/);
+    expect(guarded.slice(html.length).match(/<script>/g)).toHaveLength(2);
+    expect(guarded).toContain('parent.postMessage({source:"0docs",scrollY:scrollY},"*")');
+  });
+
+  it("되돌릴 높이를 주면 다 읽은 뒤 그 높이로 가는 스크립트를 붙이고, 0 이면 붙이지 않는다", () => {
+    expect(withLinkGuard("<p>a</p>", 640.4)).toContain("scrollTo(0,640)");
+    expect(withLinkGuard("<p>a</p>", 0)).not.toContain("scrollTo");
   });
 });
 
@@ -32,7 +38,12 @@ describe("resolveBodyView", () => {
   });
 
   it("고른 문서를 찾으면 문서, 못 찾으면 missing 이다", () => {
-    expect(resolveBodyView({ ...base, selectedDocument: selected })).toEqual({ kind: "document", document });
+    expect(resolveBodyView({ ...base, selectedDocument: selected })).toEqual({
+      kind: "document",
+      document,
+      folder: base.folders[0],
+      path: "plan-a",
+    });
     expect(resolveBodyView({ ...base, selectedDocument: { ...selected, fileName: "없음.html" } })).toEqual({
       kind: "missing",
       folderId: "a",

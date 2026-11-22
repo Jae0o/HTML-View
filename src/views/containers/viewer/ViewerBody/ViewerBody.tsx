@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useRef } from "react";
 
 import { isFolderPickerSupported, useFolderStore } from "@libs/features/folder";
 import { useViewerStore } from "@libs/features/viewer";
@@ -7,7 +7,7 @@ import { Button, EmptyState, Spinner } from "@views/components/common";
 import { FolderPlusIcon } from "@views/components/icons";
 
 import { resolveBodyView, withLinkGuard } from "./ViewerBody.utils";
-import { useDocumentHtml } from "./hooks";
+import { useDocumentHtml, useDocumentScroll } from "./hooks";
 
 // 빈 화면 · 안내 화면을 본문 한가운데에 두는 칸 — 목록이 열려 있어도 자리를 옮기지 않는다
 const CENTER_CLASS = "flex h-full items-center justify-center p-24";
@@ -25,7 +25,16 @@ const ViewerBody = () => {
   const openHelp = useViewerStore(state => state.openHelp);
 
   const view = resolveBodyView({ isSupported: isFolderPickerSupported(), isRestored, folders, selectedDocument });
-  const documentHtml = useDocumentHtml(view.kind === "document" ? view.document.handle : undefined);
+  const reloadCount = useViewerStore(state => state.reloadCount);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const scrollYRef = useDocumentScroll(iframeRef);
+  const documentHtml = useDocumentHtml({
+    ...(view.kind === "document"
+      ? { handle: view.document.handle, fileName: view.document.fileName, root: view.folder.handle, path: view.path }
+      : { handle: undefined, fileName: "", root: undefined, path: "" }),
+    reloadCount,
+    scrollYRef,
+  });
 
   // 저장된 폴더를 불러오기 전에는 아무것도 그리지 않는다 — 「폴더 없음」 화면이 잠깐 비치지 않게
   if (view.kind === "restoring") return null;
@@ -59,7 +68,7 @@ const ViewerBody = () => {
     return center(
       <EmptyState
         title="등록된 폴더가 없습니다"
-        description="HTML 문서가 든 폴더를 추가하면 목록에 모아 보여 줍니다."
+        description="HTML · MD 문서가 든 폴더를 추가하면 목록에 모아 보여 줍니다."
         actions={
           <>
             <Button
@@ -115,15 +124,24 @@ const ViewerBody = () => {
   if (view.kind === "document" && documentHtml.status === "loading") return center(<Spinner />);
 
   if (view.kind === "document" && documentHtml.status === "ready") {
-    // 문서는 권한을 좁힌 틀 안에서 연다 — 문서의 스크립트는 돌지만 이 앱의 저장소 · 화면에는 닿지 못한다
+    // 문서는 권한을 좁힌 틀 안에서 연다 — 문서의 스크립트는 돌지만 이 앱의 저장소 · 화면에는 닿지 못한다.
+    // 새로고침 중에는 보던 문서 위 가운데에 도는 표시를 겹친다(문서는 지우지 않는다, 결정 MD-A16)
     return (
-      <iframe
-        title={view.document.name}
-        srcDoc={withLinkGuard(documentHtml.html)}
-        sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms allow-modals allow-downloads"
-        allow="clipboard-write"
-        className="block size-full border-none"
-      />
+      <div className="relative size-full">
+        <iframe
+          ref={iframeRef}
+          title={view.document.name}
+          srcDoc={withLinkGuard(documentHtml.html, documentHtml.restoreY)}
+          sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms allow-modals allow-downloads"
+          allow="clipboard-write"
+          className="block size-full border-none"
+        />
+        {documentHtml.isReloading && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <Spinner />
+          </div>
+        )}
+      </div>
     );
   }
 

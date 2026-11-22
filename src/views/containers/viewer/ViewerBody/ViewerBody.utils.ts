@@ -5,18 +5,30 @@ import { type DocumentEntry, type DocumentLocation, type RegisteredFolder, findD
 // 같은 문서 안 이동(#…)은 그 자리로 스크롤하고, 바깥 주소(http · https)는 새 탭으로 열고, 나머지 링크는 막는다
 const LINK_GUARD = `<script>document.addEventListener("click",function(e){var a=e.target.closest?e.target.closest("a[href]"):null;if(!a)return;var h=a.getAttribute("href");e.preventDefault();if(h.charAt(0)==="#"){var id=decodeURIComponent(h.slice(1));var t=id?document.getElementById(id)||document.getElementsByName(id)[0]:document.documentElement;if(t)t.scrollIntoView();return}if(/^https?:/i.test(h))window.open(h,"_blank","noopener")},true)</script>`;
 
-/** 문서 HTML 뒤에 링크 지킴 스크립트를 붙인다 */
-export const withLinkGuard = (html: string): string => html + LINK_GUARD;
+// 스크롤 높이를 앱에 알린다 — 한 프레임에 한 번. 새로고침 뒤 그 높이로 되돌린다 (결정 MD-A17)
+const SCROLL_REPORT = `<script>(function(){var p=false;addEventListener("scroll",function(){if(p)return;p=true;requestAnimationFrame(function(){p=false;parent.postMessage({source:"0docs",scrollY:scrollY},"*")})},{passive:true})})()</script>`;
+
+/**
+ * 문서 HTML 뒤에 링크 지킴 · 스크롤 보고 스크립트를 붙인다.
+ * restoreY 가 0 보다 크면 문서를 다 읽은 뒤 그 높이로 되돌리는 스크립트도 붙인다 (새로고침)
+ */
+export const withLinkGuard = (html: string, restoreY = 0): string => {
+  const restore =
+    restoreY > 0 ? `<script>addEventListener("load",function(){scrollTo(0,${Math.round(restoreY)})})</script>` : "";
+
+  return html + LINK_GUARD + SCROLL_REPORT + restore;
+};
 
 /**
  * 본문에 보여 줄 화면.
  * unsupported 폴더를 열 수 없는 브라우저 · restoring 저장된 폴더를 불러오는 중 · noFolder 등록 폴더 없음 ·
- * disconnected 폴더 연결 끊김 · noSelection 문서를 고르지 않음 · document 문서 · missing 고른 문서를 찾지 못함
+ * disconnected 폴더 연결 끊김 · noSelection 문서를 고르지 않음 · document 문서 · missing 고른 문서를 찾지 못함.
+ * document 는 문서 안 그림을 읽을 등록 폴더와 문서 폴더 경로를 함께 갖는다
  */
 export type BodyView =
   | { kind: "unsupported" | "restoring" | "noFolder" | "noSelection" }
   | { kind: "disconnected" | "missing"; folderId: string }
-  | { kind: "document"; document: DocumentEntry };
+  | { kind: "document"; document: DocumentEntry; folder: RegisteredFolder; path: string };
 
 interface BodyViewInput {
   isSupported: boolean;
@@ -38,7 +50,9 @@ export const resolveBodyView = ({ isSupported, isRestored, folders, selectedDocu
 
     const document = findDocument(folders, selectedDocument);
 
-    return document ? { kind: "document", document } : { kind: "missing", folderId: selectedFolder.id };
+    return document
+      ? { kind: "document", document, folder: selectedFolder, path: selectedDocument.path }
+      : { kind: "missing", folderId: selectedFolder.id };
   }
 
   if (folders.length === 0) return { kind: "noFolder" };
