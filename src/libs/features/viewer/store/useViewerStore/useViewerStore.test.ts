@@ -53,6 +53,14 @@ describe("useViewerStore", () => {
     expect(readSaved()).toEqual({ isListOpen: true, selectedDocument: DOCUMENT, favorites: [], listView: "all" });
   });
 
+  it("closeDocument 는 보던 문서를 닫고 기기에서도 지운다", () => {
+    useViewerStore.getState().selectDocument(DOCUMENT);
+    useViewerStore.getState().closeDocument();
+
+    expect(useViewerStore.getState().selectedDocument).toBeNull();
+    expect(readSaved().selectedDocument).toBeNull();
+  });
+
   it("잠깐 닫힌 목록에서 toggleList 를 부르면 다시 연다", () => {
     useViewerStore.getState().dismissList();
     useViewerStore.getState().toggleList();

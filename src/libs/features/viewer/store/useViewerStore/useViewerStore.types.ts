@@ -21,6 +21,8 @@ export interface ViewerState {
   dismissList: () => void;
   /** 문서를 고른다 — 목록을 잠깐 닫는다 */
   selectDocument: (document: DocumentLocation) => void;
+  /** 보던 문서를 닫는다 — 그 문서가 든 폴더를 숨겼을 때. 목록 상태는 그대로 둔다 */
+  closeDocument: () => void;
   /** 즐겨찾기를 켜고 끈다 — 켜면 맨 뒤에 붙는다 */
   toggleFavorite: (item: FavoriteItem) => void;
   /** 등록 폴더와 그 안쪽 항목의 즐겨찾기를 모두 지운다 (등록 해제 때) */

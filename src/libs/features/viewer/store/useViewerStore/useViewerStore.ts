@@ -23,6 +23,7 @@ const useViewerStore = create<ViewerState>()(
         ),
       dismissList: () => set({ isListDismissed: true }),
       selectDocument: document => set({ selectedDocument: document, isListDismissed: true }),
+      closeDocument: () => set({ selectedDocument: null }),
       toggleFavorite: item =>
         set(state => {
           const key = favoriteKey(item);
