@@ -1,4 +1,4 @@
-import { downloadDocument } from "./DocumentActions.utils";
+import { copyDocumentText, downloadDocument } from "./DocumentActions.utils";
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -30,5 +30,20 @@ describe("downloadDocument", () => {
     vi.runAllTimers();
 
     expect(revoke).toHaveBeenCalledWith("blob:sample");
+  });
+});
+
+describe("copyDocumentText", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("파일 원문 글자를 그대로 클립보드에 넣는다", async () => {
+    const writeText = vi.fn(async () => {});
+    vi.stubGlobal("navigator", { clipboard: { writeText } });
+
+    await copyDocumentText(fakeHandle(new File(["# 제목\n\n- [x] 끝"], "플랜.md")));
+
+    expect(writeText).toHaveBeenCalledWith("# 제목\n\n- [x] 끝");
   });
 });

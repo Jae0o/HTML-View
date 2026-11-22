@@ -1,14 +1,14 @@
-import { findDocument, useFolderStore } from "@libs/features/folder";
+import { documentFormatOf, findDocument, useFolderStore } from "@libs/features/folder";
 import { useToastStore } from "@libs/features/toast";
 import { useViewerStore } from "@libs/features/viewer";
 
 import { IconButton, Tooltip } from "@views/components/common";
-import { DownloadIcon, RefreshIcon } from "@views/components/icons";
+import { CopyIcon, DownloadIcon, RefreshIcon } from "@views/components/icons";
 
 import { DOCUMENT_ACTION_MESSAGE } from "./DocumentActions.constants";
-import { downloadDocument } from "./DocumentActions.utils";
+import { copyDocumentText, downloadDocument } from "./DocumentActions.utils";
 
-/** 열린 문서의 「새로고침」 · 「다운로드」 버튼 — 화면 오른쪽 위 로고 왼쪽에 둔다. 고른 문서가 목록에 없으면 그리지 않는다 */
+/** 열린 문서의 「새로고침」 · 「MD 복사」(MD 문서만) · 「다운로드」 버튼 — 화면 오른쪽 위 로고 왼쪽에 둔다. 고른 문서가 목록에 없으면 그리지 않는다 */
 const DocumentActions = () => {
   const folders = useFolderStore(state => state.folders);
   const selectedDocument = useViewerStore(state => state.selectedDocument);
@@ -29,6 +29,17 @@ const DocumentActions = () => {
     }
   };
 
+  // MD 문서만 원문 글자를 복사한다 — 누를 때 파일을 새로 읽는다. HTML 은 코드가 붙어 쓸모가 없어 두지 않는다
+  const isMarkdown = documentFormatOf(openedDocument.fileName) === "md";
+  const handleCopy = async () => {
+    try {
+      await copyDocumentText(openedDocument.handle);
+      showToast(DOCUMENT_ACTION_MESSAGE.copied);
+    } catch {
+      showToast(DOCUMENT_ACTION_MESSAGE.copyFailed);
+    }
+  };
+
   // 새로고침은 보던 문서를 파일에서 다시 읽는다 — 읽는 동안 · 끝 · 실패 표시는 본문이 한다 (결정 MD-A15 · A16)
   return (
     <>
@@ -40,6 +51,16 @@ const DocumentActions = () => {
           onClick={reloadDocument}
         />
       </Tooltip>
+      {isMarkdown && (
+        <Tooltip label="MD 복사">
+          <IconButton
+            floating
+            aria-label="MD 복사"
+            icon={<CopyIcon />}
+            onClick={handleCopy}
+          />
+        </Tooltip>
+      )}
       <Tooltip label="다운로드">
         <IconButton
           floating
