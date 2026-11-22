@@ -17,6 +17,7 @@ const HelpDialog = () => {
     <Dialog
       open={isHelpOpen}
       width="m"
+      closeOnBackdrop
       aria-labelledby={titleId}
       onClose={closeHelp}
     >
