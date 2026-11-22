@@ -46,7 +46,7 @@ const MoreMenu = ({ items }: MoreMenuProps) => {
 
   const close = useCallback(() => setAnchor(null), []);
 
-  // Esc 로 닫으면 포커스를 ⋯ 버튼으로 돌린다 — 메뉴 항목이 사라지며 포커스를 잃지 않게
+  // Esc · 항목 누름으로 닫으면 포커스를 ⋯ 버튼으로 돌린다 — 메뉴 항목이 사라지며 포커스를 잃지 않게
   const closeToTrigger = useCallback(() => {
     setAnchor(null);
     triggerRef.current?.querySelector("button")?.focus();
@@ -129,8 +129,9 @@ const MoreMenu = ({ items }: MoreMenuProps) => {
                 role="menuitem"
                 autoFocus={index === 0}
                 className="flex h-32 cursor-pointer items-center rounded-6 bg-transparent px-8 text-left text-base text-text-primary hover:bg-surface-hover"
+                // 항목을 고르면 포커스를 ⋯ 로 먼저 돌린다 — 이어서 뜨는 창이 닫힐 때 브라우저가 포커스를 ⋯ 로 돌려준다
                 onClick={() => {
-                  close();
+                  closeToTrigger();
                   item.onSelect();
                 }}
               >
