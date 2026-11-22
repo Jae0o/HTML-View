@@ -16,7 +16,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // 창 틀만 본다 — 안쪽 여백 · 제목 · 버튼은 쓰는 쪽이 넣는다
-const Demo = ({ width }: { width: "s" | "m" }) => {
+const Demo = ({ width, closeOnBackdrop = false }: { width: "s" | "m"; closeOnBackdrop?: boolean }) => {
   const [open, setOpen] = useState(true);
   const titleId = useId();
 
@@ -26,6 +26,7 @@ const Demo = ({ width }: { width: "s" | "m" }) => {
       <Dialog
         open={open}
         width={width}
+        closeOnBackdrop={closeOnBackdrop}
         aria-labelledby={titleId}
         onClose={() => setOpen(false)}
       >
@@ -36,7 +37,9 @@ const Demo = ({ width }: { width: "s" | "m" }) => {
           >
             창 제목
           </h2>
-          <p className="m-0 text-sm text-text-secondary">Esc 를 누르거나 닫기를 누르면 닫힌다.</p>
+          <p className="m-0 text-sm text-text-secondary">
+            Esc 를 누르거나 닫기를 누르면 닫힌다.{closeOnBackdrop && " 바깥 어두운 곳을 눌러도 닫힌다."}
+          </p>
           <div className="flex justify-end">
             <Button onClick={() => setOpen(false)}>닫기</Button>
           </div>
@@ -51,3 +54,13 @@ export const Small: Story = { render: () => <Demo width="s" /> };
 
 /** 도움말 창 폭(480px) */
 export const Medium: Story = { render: () => <Demo width="m" /> };
+
+/** 바깥을 눌러도 닫힘 — 도움말 창처럼 읽기만 하는 창 */
+export const CloseOnBackdrop: Story = {
+  render: () => (
+    <Demo
+      width="m"
+      closeOnBackdrop
+    />
+  ),
+};
