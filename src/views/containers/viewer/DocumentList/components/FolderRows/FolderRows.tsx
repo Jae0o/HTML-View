@@ -3,7 +3,7 @@ import { useState } from "react";
 import { type RegisteredFolder, useFolderStore } from "@libs/features/folder";
 import { useViewerStore } from "@libs/features/viewer";
 
-import { Button, ConfirmDialog, TextInput } from "@views/components/common";
+import { BrandLogo, Button, ConfirmDialog, TextInput } from "@views/components/common";
 import { FolderIcon } from "@views/components/icons";
 import { TreeRow } from "@views/components/viewer";
 
@@ -106,7 +106,11 @@ const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PAT
       <ConfirmDialog
         open={isRenameOpen}
         title="폴더 이름 변경"
-        description="0Docs 목록에만 보이는 이름입니다. 실제 폴더 이름은 바뀌지 않습니다."
+        description={
+          <>
+            <BrandLogo size="s" /> 목록에만 보이는 이름입니다. 실제 폴더 이름은 바뀌지 않습니다.
+          </>
+        }
         confirmLabel="변경"
         onConfirm={handleRename}
         onCancel={() => setIsRenameOpen(false)}

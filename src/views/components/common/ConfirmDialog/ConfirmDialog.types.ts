@@ -6,7 +6,8 @@ export type ConfirmDialogTone = "default" | "danger";
 export interface ConfirmDialogProps {
   open: boolean;
   title: string;
-  description: string;
+  /** 설명 — 글자 사이에 로고를 넣을 수 있게 그림 요소도 받는다 */
+  description: ReactNode;
   /** 확인 버튼 글자 */
   confirmLabel: string;
   cancelLabel?: string;
