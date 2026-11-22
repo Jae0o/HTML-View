@@ -7,8 +7,10 @@ import { FileHtmlIcon } from "./FileHtmlIcon";
 import { FolderIcon } from "./FolderIcon";
 import { FolderPlusIcon } from "./FolderPlusIcon";
 import { HelpIcon } from "./HelpIcon";
+import { MarkdownIcon } from "./MarkdownIcon";
 import { MenuIcon } from "./MenuIcon";
 import { MoreIcon } from "./MoreIcon";
+import { RefreshIcon } from "./RefreshIcon";
 import { SearchIcon } from "./SearchIcon";
 import { StarIcon } from "./StarIcon";
 
@@ -21,8 +23,10 @@ const ICONS = [
   { name: "FolderIcon", icon: <FolderIcon size={20} /> },
   { name: "FolderPlusIcon", icon: <FolderPlusIcon size={16} /> },
   { name: "HelpIcon", icon: <HelpIcon size={16} /> },
+  { name: "MarkdownIcon", icon: <MarkdownIcon size={20} /> },
   { name: "MenuIcon", icon: <MenuIcon size={16} /> },
   { name: "MoreIcon", icon: <MoreIcon size={16} /> },
+  { name: "RefreshIcon", icon: <RefreshIcon size={16} /> },
   { name: "SearchIcon", icon: <SearchIcon size={16} /> },
   { name: "StarIcon", icon: <StarIcon size={16} /> },
 ];
