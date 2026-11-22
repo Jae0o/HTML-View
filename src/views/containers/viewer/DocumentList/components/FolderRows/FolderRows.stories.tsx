@@ -17,6 +17,7 @@ const FOLDER = {
     { path: "", documents: [document("개요")] },
     { path: "001-create-side-menu", documents: [document("구현 분석"), document("플랜")] },
   ],
+  hiddenPaths: [],
 } as unknown as RegisteredFolder;
 
 const meta: Meta<typeof FolderRows> = {
@@ -41,6 +42,9 @@ type Story = StoryObj<typeof meta>;
 
 /** 줄에 마우스를 올리면 오른쪽 끝에 ⋯ 버튼이 보인다. 누르면 메뉴가 열리고, 「이름 변경」 은 입력 창 · 「등록 해제」 는 확인 창이 뜬다 */
 export const Connected: Story = {};
+
+/** 숨긴 폴더가 있는 등록 폴더 — ⋯ 메뉴에 「숨긴 폴더」 가 생기고, 누르면 숨긴 폴더 창이 열린다 */
+export const WithHiddenFolders: Story = { args: { folder: { ...FOLDER, hiddenPaths: [".storybook", "done"] } } };
 
 /** HTML 문서가 없는 등록 폴더 */
 export const Empty: Story = { args: { folder: { ...FOLDER, htmlFolders: [] } } };

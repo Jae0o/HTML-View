@@ -10,6 +10,7 @@ import { TreeRow } from "@views/components/viewer";
 import { ROOT_FOLDER_LABEL } from "../../DocumentList.constants";
 import { Collapse } from "../Collapse";
 import { FavoriteButton } from "../FavoriteButton";
+import { HiddenFoldersDialog } from "../HiddenFoldersDialog";
 import { HtmlFolderRows } from "../HtmlFolderRows";
 import { MoreMenu } from "../MoreMenu";
 
@@ -23,20 +24,23 @@ interface FolderRowsProps {
 
 const NO_PATHS: string[] = [];
 
-/** 등록 폴더 한 줄과 그 안의 HTML 폴더 줄들. 줄 오른쪽 끝 ⋯ 메뉴의 「이름 변경」 입력 창 · 「등록 해제」 확인 창도 여기서 띄운다 */
+/** 등록 폴더 한 줄과 그 안의 HTML 폴더 줄들. 줄 오른쪽 끝 ⋯ 메뉴의 「이름 변경」 입력 창 · 「숨긴 폴더」 창 · 「등록 해제」 확인 창도 여기서 띄운다 */
 const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PATHS }: FolderRowsProps) => {
   const reconnect = useFolderStore(state => state.reconnect);
   const removeFolder = useFolderStore(state => state.removeFolder);
   const renameFolder = useFolderStore(state => state.renameFolder);
+  const showPath = useFolderStore(state => state.showPath);
   const removeFavoritesOfFolder = useViewerStore(state => state.removeFavoritesOfFolder);
 
   // 등록 폴더는 처음에 펼쳐 있다
   const [isExpanded, setIsExpanded] = useState(true);
   const [isRemoveOpen, setIsRemoveOpen] = useState(false);
   const [isRenameOpen, setIsRenameOpen] = useState(false);
+  const [isHiddenOpen, setIsHiddenOpen] = useState(false);
   const [nameInput, setNameInput] = useState("");
 
   const isConnected = folder.status === "connected";
+  const hasHidden = folder.hiddenPaths.length > 0;
   const isOpen = isConnected && (forceExpanded || isExpanded);
 
   // 입력 칸은 지금 이름을 채운 채 연다
@@ -50,6 +54,9 @@ const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PAT
     setIsRenameOpen(false);
     await renameFolder(folder.id, nameInput);
   };
+
+  // 숨긴 폴더가 다 없어지면 창을 닫는다 — 열림 상태가 남으면 다음에 숨길 때 창이 저절로 뜬다. 그리는 중에 바로 맞춘다
+  if (isHiddenOpen && !hasHidden) setIsHiddenOpen(false);
 
   // 등록을 해제하면 그 폴더와 안쪽 항목의 즐겨찾기도 함께 지운다
   const handleRemove = async () => {
@@ -79,6 +86,8 @@ const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PAT
             <MoreMenu
               items={[
                 { label: "이름 변경", onSelect: openRename },
+                // 숨긴 폴더가 있을 때만 보인다
+                ...(hasHidden ? [{ label: "숨긴 폴더", onSelect: () => setIsHiddenOpen(true) }] : []),
                 { label: "등록 해제", onSelect: () => setIsRemoveOpen(true) },
               ]}
             />
@@ -128,6 +137,14 @@ const FolderRows = ({ folder, forceExpanded = false, forceExpandedPaths = NO_PAT
           }}
         />
       </ConfirmDialog>
+
+      <HiddenFoldersDialog
+        open={isHiddenOpen}
+        folderName={folder.name}
+        hiddenPaths={folder.hiddenPaths}
+        onShow={path => showPath(folder.id, path)}
+        onClose={() => setIsHiddenOpen(false)}
+      />
 
       <ConfirmDialog
         open={isRemoveOpen}
