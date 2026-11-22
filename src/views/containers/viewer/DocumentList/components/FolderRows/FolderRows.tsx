@@ -46,8 +46,9 @@ const FolderRows = ({
     state.visibleFormats.length === 2 ? EMPTY_FOLDER_LABEL.all : EMPTY_FOLDER_LABEL[state.visibleFormats[0]],
   );
 
-  // 등록 폴더는 처음에 펼쳐 있다
-  const [isExpanded, setIsExpanded] = useState(true);
+  // 등록 폴더는 처음에 펼쳐 있다 — 접은 상태는 줄 밖(스토어)에 둬, 검색 · 형식 칩으로 줄이 잠깐 사라져도 남는다
+  const isExpanded = useViewerStore(state => !state.collapsedFolderIds.includes(folder.id));
+  const toggleFolder = useViewerStore(state => state.toggleFolder);
   const [isRemoveOpen, setIsRemoveOpen] = useState(false);
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [isHiddenOpen, setIsHiddenOpen] = useState(false);
@@ -102,7 +103,10 @@ const FolderRows = ({
                   다시 연결
                 </Button>
               )}
-              <FavoriteButton item={{ kind: "folder", folderId: folder.id }} />
+              <FavoriteButton
+                item={{ kind: "folder", folderId: folder.id }}
+                name={folder.name}
+              />
               <MoreMenu
                 items={[
                   { label: "이름 변경", onSelect: openRename },
@@ -113,7 +117,7 @@ const FolderRows = ({
               />
             </>
           }
-          onClick={isConnected && !forceExpanded ? () => setIsExpanded(previous => !previous) : undefined}
+          onClick={isConnected && !forceExpanded ? () => toggleFolder(folder.id) : undefined}
         />
       </div>
 

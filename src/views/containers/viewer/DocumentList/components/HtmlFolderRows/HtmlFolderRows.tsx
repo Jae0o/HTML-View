@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { type HtmlFolder, isHiddenPath, splitPath, useFolderStore } from "@libs/features/folder";
-import { useViewerStore } from "@libs/features/viewer";
+import { favoriteKey, useViewerStore } from "@libs/features/viewer";
 
 import { Tag } from "@views/components/common";
 import { TreeRow } from "@views/components/viewer";
@@ -28,12 +28,10 @@ const DOCUMENT_DEPTH = { 0: 1, 1: 2 } as const;
 
 /** HTML 폴더 한 줄과 그 안의 문서 줄들. 줄 오른쪽 끝 ⋯ 메뉴의 「숨기기」 와 숨길 폴더 고르기 창도 여기서 띄운다 */
 const HtmlFolderRows = ({ folderId, htmlFolder, label, depth = 1, forceExpanded = false }: HtmlFolderRowsProps) => {
-  // 처음에는 접혀 있다. 다시 들어왔을 때 보던 문서의 줄이 보이도록, 그 문서가 든 폴더만 펼친 채로 시작한다
-  const [isExpanded, setIsExpanded] = useState(() => {
-    const { selectedDocument } = useViewerStore.getState();
-
-    return selectedDocument?.folderId === folderId && selectedDocument.path === htmlFolder.path;
-  });
+  // 처음에는 접혀 있다(다시 들어오면 보던 문서가 든 폴더만 펼친 채). 펼친 상태는 줄 밖(스토어)에 둬, 검색 · 형식 칩으로 줄이 잠깐 사라져도 남는다
+  const expandKey = favoriteKey({ kind: "htmlFolder", folderId, path: htmlFolder.path });
+  const isExpanded = useViewerStore(state => state.expandedHtmlFolders.includes(expandKey));
+  const toggleHtmlFolder = useViewerStore(state => state.toggleHtmlFolder);
 
   const hidePath = useFolderStore(state => state.hidePath);
   const closeDocument = useViewerStore(state => state.closeDocument);
@@ -66,11 +64,14 @@ const HtmlFolderRows = ({ folderId, htmlFolder, label, depth = 1, forceExpanded 
         trailing={<Tag>{htmlFolder.documents.length}</Tag>}
         actions={
           <>
-            <FavoriteButton item={{ kind: "htmlFolder", folderId, path: htmlFolder.path }} />
+            <FavoriteButton
+              item={{ kind: "htmlFolder", folderId, path: htmlFolder.path }}
+              name={label}
+            />
             <MoreMenu items={[{ label: "숨기기", onSelect: openHide }]} />
           </>
         }
-        onClick={forceExpanded ? undefined : () => setIsExpanded(previous => !previous)}
+        onClick={forceExpanded ? undefined : () => toggleHtmlFolder(folderId, htmlFolder.path)}
       />
 
       <Collapse open={isOpen}>

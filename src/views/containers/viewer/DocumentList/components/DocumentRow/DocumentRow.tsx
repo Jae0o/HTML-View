@@ -43,7 +43,12 @@ const DocumentRow = ({ folderId, path, document, depth }: DocumentRowProps) => {
         )
       }
       selected={isSelected}
-      actions={<FavoriteButton item={{ kind: "document", folderId, path, fileName: document.fileName }} />}
+      actions={
+        <FavoriteButton
+          item={{ kind: "document", folderId, path, fileName: document.fileName }}
+          name={document.name}
+        />
+      }
       onClick={() => selectDocument({ folderId, path, fileName: document.fileName })}
     />
   );

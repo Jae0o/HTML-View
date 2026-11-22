@@ -7,7 +7,7 @@ import FavoriteButton from "./FavoriteButton";
 const meta: Meta<typeof FavoriteButton> = {
   title: "viewer/containers/DocumentList/FavoriteButton",
   component: FavoriteButton,
-  args: { item: { kind: "folder", folderId: "sample" } },
+  args: { item: { kind: "folder", folderId: "sample" }, name: "sample" },
   // 꺼진 별은 줄(group)에 마우스를 올려야 보인다
   decorators: [
     Story => (
