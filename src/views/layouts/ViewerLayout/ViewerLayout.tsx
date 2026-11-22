@@ -3,14 +3,17 @@ import { BrandLogo } from "@views/components/common";
 import type { ViewerLayoutProps } from "./ViewerLayout.types";
 
 /** 화면 틀 — 본문이 화면 전체를 쓰고, 로고와 문서 목록은 그 위에 뜬다 */
-const ViewerLayout = ({ children, floating }: ViewerLayoutProps) => (
+const ViewerLayout = ({ children, actions, floating }: ViewerLayoutProps) => (
   <div className="relative h-screen overflow-hidden bg-bg-canvas">
     <main className="h-full">{children}</main>
-    {/* 로고는 누를 수 없다 — 아래 본문을 가리지 않게 마우스를 통과시킨다 */}
-    <div className="pointer-events-none absolute top-12 right-16 flex h-32 items-center drop-shadow-logo">
-      {/* 흰 번짐은 안쪽에, 옅은 검정 그림자는 바깥에 건다 */}
-      <div className="flex drop-shadow-logo-glow">
-        <BrandLogo />
+    {/* 로고 줄 — 로고는 누를 수 없어 아래 본문을 가리지 않게 마우스를 통과시킨다. 왼쪽 버튼만 누를 수 있다 */}
+    <div className="pointer-events-none absolute top-12 right-16 flex h-32 items-center gap-8">
+      <div className="pointer-events-auto flex items-center gap-8">{actions}</div>
+      <div className="drop-shadow-logo">
+        {/* 흰 번짐은 안쪽에, 옅은 검정 그림자는 바깥에 건다 */}
+        <div className="flex drop-shadow-logo-glow">
+          <BrandLogo />
+        </div>
       </div>
     </div>
     {floating}
