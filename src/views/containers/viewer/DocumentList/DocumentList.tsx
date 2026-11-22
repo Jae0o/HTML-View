@@ -1,4 +1,4 @@
-import { type TransitionEvent, useState } from "react";
+import { useState } from "react";
 
 import { filterFolders, findDocument, isFolderPickerSupported, useFolderStore } from "@libs/features/folder";
 import { favoriteKey, resolveFavorites, useViewerStore } from "@libs/features/viewer";
@@ -12,11 +12,20 @@ import { DocumentRow, FolderRows, HtmlFolderRows } from "./components";
 import { useClickAway } from "./hooks";
 
 // 목록 상자 — 닫혀 있을 때는 지우지 않고 감추기만 한다(줄의 펼침 상태가 남는다).
-// 열고 닫을 때 200ms 동안 흐려지며 위로 8px 움직인다. 움직임 줄이기 설정이면 흐려지기만 한다. 사라지는 동안은 누름을 받지 않는다
+// 열 때는 접기 버튼 자리(= 닫혔을 때의 열기 버튼 자리)에서 펼쳐지고, 닫을 때는 그 자리로 접혀 들어간다 — 보이는 영역(clip-path)을 200ms 동안 넓히고 좁힌다.
+// 접힌 영역: 위 · 왼쪽 1.3rem(테두리 1px + 안쪽 여백 12px)에서 버튼 크기 3.2rem 만큼. 펼친 영역은 그림자가 잘리지 않게 상자보다 4rem 넓게 둔다.
+// 흐려지지 않는다 — 접기 아이콘이 끝까지 보여야 열기 버튼으로 바뀔 때 깜빡이지 않는다.
+// 움직임 줄이기 설정이면 영역은 그대로 두고 흐려지기만 한다. 사라지는 동안은 누름을 받지 않는다
 const SURFACE_OPEN_CLASS =
-  "absolute top-12 left-16 z-400 flex max-h-[calc(100vh-2.4rem)] w-[48rem] flex-col gap-8 p-12 transition-[opacity,translate,visibility] duration-200";
+  "absolute top-12 left-16 z-400 flex max-h-[calc(100vh-2.4rem)] w-[48rem] flex-col gap-8 p-12 transition-[opacity,clip-path,visibility] duration-200 motion-safe:[clip-path:inset(-4rem)]";
 const SURFACE_CLOSED_CLASS =
-  "pointer-events-none invisible absolute top-12 left-16 z-400 flex max-h-[calc(100vh-2.4rem)] w-[48rem] flex-col gap-8 p-12 opacity-0 transition-[opacity,translate,visibility] duration-200 motion-safe:-translate-y-8";
+  "pointer-events-none invisible absolute top-12 left-16 z-400 flex max-h-[calc(100vh-2.4rem)] w-[48rem] flex-col gap-8 p-12 transition-[opacity,clip-path,visibility] duration-200 motion-safe:[clip-path:inset(1.3rem_calc(100%_-_4.5rem)_calc(100%_-_4.5rem)_1.3rem_round_0.6rem)] motion-reduce:opacity-0";
+
+// 열기 버튼 칸 — 빈 여백은 마우스를 통과시킨다. 목록이 열리면 상자가 다 펼쳐진 뒤(200ms) 감춘다. 닫히면 바로 보인다
+const OPEN_BUTTON_SHOWN_CLASS =
+  "pointer-events-none absolute top-12 left-16 border border-transparent p-12 transition-[visibility] duration-200";
+const OPEN_BUTTON_HIDDEN_CLASS =
+  "pointer-events-none invisible absolute top-12 left-16 border border-transparent p-12 transition-[visibility] duration-200";
 
 /** 문서 목록 — 본문 위 왼쪽에 떠 있다. 접거나 문서를 고르면 열기 버튼만 남는다 */
 const DocumentList = () => {
@@ -37,14 +46,6 @@ const DocumentList = () => {
   // 고른 문서를 찾을 수 있을 때만 목록 밖을 누르면 닫는다 — 빈 화면 · 문서를 찾지 못한 화면에서는 닫지 않는다
   const markInside = useClickAway(isListVisible && isDocumentShown, dismissList);
 
-  // 목록 상자가 화면에 남아 있는지 — 닫을 때는 사라짐이 끝난 뒤에 열기 버튼을 보인다(두 개가 겹쳐 보이지 않게)
-  const [isSurfaceShown, setIsSurfaceShown] = useState(isListVisible);
-  if (isListVisible && !isSurfaceShown) setIsSurfaceShown(true);
-
-  const handleSurfaceTransitionEnd = (e: TransitionEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget && e.propertyName === "opacity" && !isListVisible) setIsSurfaceShown(false);
-  };
-
   // 검색어는 기억하지 않는다 — 입력하는 대로 목록을 거른다
   const [query, setQuery] = useState("");
   const isSearching = query.trim() !== "";
@@ -60,27 +61,36 @@ const DocumentList = () => {
 
   return (
     <>
-      {!isSurfaceShown && (
-        <div className="absolute top-12 left-16">
-          <Tooltip label="목록 열기">
-            <IconButton
-              floating
-              aria-label="목록 열기"
-              icon={<MenuIcon />}
-              onClick={toggleList}
-            />
-          </Tooltip>
-        </div>
-      )}
+      {/* 목록 상자와 같은 자리 · 테두리 · 안쪽 여백을 둬, 열기 버튼이 상자 안 접기 버튼과 같은 자리에 온다.
+          지우지 않고 상자 아래 층에 늘 둔다 — 열고 닫는 순간에도 이 자리의 아이콘이 비지 않는다(깜빡임 방지) */}
+      <div className={isListVisible ? OPEN_BUTTON_HIDDEN_CLASS : OPEN_BUTTON_SHOWN_CLASS}>
+        <Tooltip label="목록 열기">
+          <IconButton
+            floating
+            aria-label="목록 열기"
+            icon={<MenuIcon />}
+            onClick={toggleList}
+            className="pointer-events-auto"
+          />
+        </Tooltip>
+      </div>
 
       <FloatingSurface
         role="navigation"
         aria-label="문서 목록"
         onPointerDown={markInside}
-        onTransitionEnd={handleSurfaceTransitionEnd}
         className={isListVisible ? SURFACE_OPEN_CLASS : SURFACE_CLOSED_CLASS}
       >
+        {/* 접기 버튼을 맨 앞에 둔다 — 닫혔을 때의 열기 버튼과 같은 자리다 */}
         <div className="flex items-center gap-8">
+          <Tooltip label="목록 접기">
+            <IconButton
+              variant="ghost"
+              aria-label="목록 접기"
+              icon={<MenuIcon />}
+              onClick={toggleList}
+            />
+          </Tooltip>
           <SearchInput
             aria-label={searchLabel}
             placeholder={searchLabel}
@@ -95,14 +105,6 @@ const DocumentList = () => {
               pressed={isFavoritesView}
               icon={<StarIcon fill={isFavoritesView ? "currentColor" : "none"} />}
               onClick={toggleListView}
-            />
-          </Tooltip>
-          <Tooltip label="목록 접기">
-            <IconButton
-              variant="ghost"
-              aria-label="목록 접기"
-              icon={<MenuIcon />}
-              onClick={toggleList}
             />
           </Tooltip>
         </div>
