@@ -241,6 +241,7 @@ export default Button;
 - **barrel(`index.ts`)을 통한 import 의무** — 컴포넌트/훅의 구현 파일을 직접 가리키지 않는다. 항상 폴더 barrel을 통한다 (`from "@views/components/common"`, `from "@libs/features/{domain}"`).
 - **self-import 예외** — 같은 폴더(또는 같은 barrel이 묶는 영역) 내부에서는 상대 경로 / 직접 경로 허용. barrel 통한 self-import는 순환 위험으로 금지.
 - **무거운 부품 예외** — `views/components/common` barrel 은 첫 화면부터 받는 청크라, 큰 라이브러리를 끌고 오는 부품(예: 마크다운 렌더 라이브러리를 쓰는 부품)은 barrel 에 넣지 않고 자기 폴더 barrel 로 직접 import 한다. 새 예외를 만들기 전에 번들 크기를 먼저 잰다.
+- 기능(`libs/features/{domain}`) barrel 도 같다 — 동적으로만 부르는 무거운 모듈(예: `libs/features/viewer/markdown`)은 도메인 barrel 에 넣지 않고 그 폴더 barrel 을 `await import(...)` 로 부른다. 도메인 루트 `export *` 규칙의 예외다.
 - **병합** — 같은 파일에서 같은 barrel의 여러 심볼은 한 줄로 합친다. 값/타입은 별도 라인으로 분리.
 
 ```ts
