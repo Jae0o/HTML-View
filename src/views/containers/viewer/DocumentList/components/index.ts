@@ -1,6 +1,7 @@
 export * from "./Collapse";
 export * from "./DocumentRow";
 export * from "./FavoriteButton";
+export * from "./FilterChip";
 export * from "./FolderRows";
 export * from "./HiddenFoldersDialog";
 export * from "./HidePathDialog";
