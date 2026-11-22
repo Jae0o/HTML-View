@@ -38,12 +38,7 @@ const HelpDialog = () => {
         </div>
 
         <div className="flex min-h-0 flex-col gap-20 overflow-y-auto px-24 pb-24">
-          <section className="flex flex-col gap-8">
-            <h3 className="m-0 text-base font-semibold">
-              <BrandLogo size="s" /> {HELP_COPY.aboutTitle}
-            </h3>
-            <p className="m-0 text-sm text-text-secondary">{HELP_COPY.about}</p>
-          </section>
+          <p className="m-0 text-sm text-text-secondary">{HELP_COPY.about}</p>
 
           <section className="flex flex-col gap-8">
             <h3 className="m-0 text-base font-semibold">{HELP_COPY.howTitle}</h3>
