@@ -1,3 +1,4 @@
+import { favoriteKey } from "../../utils";
 import { VIEWER_STORAGE_KEY } from "./useViewerStore.constants";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -31,6 +32,8 @@ describe("useViewerStore", () => {
       visibleFormats: ["html", "md"],
       reloadCount: 0,
       isHelpOpen: false,
+      collapsedFolderIds: [],
+      expandedHtmlFolders: [],
     });
   });
 
@@ -146,5 +149,44 @@ describe("useViewerStore", () => {
 
     expect(useViewerStore.getState().reloadCount).toBe(1);
     expect(readSaved().reloadCount).toBeUndefined();
+  });
+
+  it("toggleFolder 로 등록 폴더를 접고 펴며, 접은 상태는 기기에 기억하지 않는다", () => {
+    useViewerStore.getState().toggleFolder("a");
+    expect(useViewerStore.getState().collapsedFolderIds).toEqual(["a"]);
+    expect(readSaved().collapsedFolderIds).toBeUndefined();
+
+    useViewerStore.getState().toggleFolder("a");
+    expect(useViewerStore.getState().collapsedFolderIds).toEqual([]);
+  });
+
+  it("toggleHtmlFolder 는 등록 폴더 · 경로가 같은 HTML 폴더만 펴고 접으며, 기기에 기억하지 않는다", () => {
+    const key = favoriteKey({ kind: "htmlFolder", folderId: "a", path: "plan-a" });
+
+    useViewerStore.getState().toggleHtmlFolder("a", "plan-a");
+    useViewerStore.getState().toggleHtmlFolder("b", "plan-a");
+    expect(useViewerStore.getState().expandedHtmlFolders).toEqual([
+      key,
+      favoriteKey({ kind: "htmlFolder", folderId: "b", path: "plan-a" }),
+    ]);
+    expect(readSaved().expandedHtmlFolders).toBeUndefined();
+
+    useViewerStore.getState().toggleHtmlFolder("b", "plan-a");
+    expect(useViewerStore.getState().expandedHtmlFolders).toEqual([key]);
+  });
+});
+
+describe("useViewerStore 다시 들어올 때", () => {
+  it("기기에 남은 보던 문서가 든 HTML 폴더만 펼친 채로 시작한다", async () => {
+    memory.set(VIEWER_STORAGE_KEY, JSON.stringify({ state: { selectedDocument: DOCUMENT }, version: 0 }));
+    vi.resetModules();
+
+    const { default: freshStore } = await import("./useViewerStore");
+
+    expect(freshStore.getState().selectedDocument).toEqual(DOCUMENT);
+    expect(freshStore.getState().expandedHtmlFolders).toEqual([
+      favoriteKey({ kind: "htmlFolder", folderId: "a", path: "plan-a" }),
+    ]);
+    expect(freshStore.getState().collapsedFolderIds).toEqual([]);
   });
 });

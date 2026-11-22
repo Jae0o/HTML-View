@@ -10,6 +10,13 @@ import { persist } from "zustand/middleware";
 // 형식을 켜고 끌 때 이 순서로 다시 만든다
 const FORMAT_ORDER: DocumentFormat[] = ["html", "md"];
 
+// 목록에 있으면 빼고, 없으면 넣는다
+const toggleIn = (list: string[], value: string): string[] =>
+  list.includes(value) ? list.filter(item => item !== value) : [...list, value];
+
+// HTML 폴더 줄의 펼침 키 — 즐겨찾기 키와 같은 모양을 쓴다
+const htmlFolderKey = (folderId: string, path: string): string => favoriteKey({ kind: "htmlFolder", folderId, path });
+
 const useViewerStore = create<ViewerState>()(
   persist(
     set => ({
@@ -21,6 +28,8 @@ const useViewerStore = create<ViewerState>()(
       visibleFormats: ["html", "md"],
       reloadCount: 0,
       isHelpOpen: false,
+      collapsedFolderIds: [],
+      expandedHtmlFolders: [],
       // 목록이 보이면 접고, 안 보이면(접혔거나 잠깐 닫혔으면) 연다
       toggleList: () =>
         set(state =>
@@ -56,6 +65,9 @@ const useViewerStore = create<ViewerState>()(
       reloadDocument: () => set(state => ({ reloadCount: state.reloadCount + 1 })),
       openHelp: () => set({ isHelpOpen: true }),
       closeHelp: () => set({ isHelpOpen: false }),
+      toggleFolder: folderId => set(state => ({ collapsedFolderIds: toggleIn(state.collapsedFolderIds, folderId) })),
+      toggleHtmlFolder: (folderId, path) =>
+        set(state => ({ expandedHtmlFolders: toggleIn(state.expandedHtmlFolders, htmlFolderKey(folderId, path)) })),
     }),
     {
       name: VIEWER_STORAGE_KEY,
@@ -66,6 +78,17 @@ const useViewerStore = create<ViewerState>()(
         listView: state.listView,
         visibleFormats: state.visibleFormats,
       }),
+      // 다시 들어왔을 때 보던 문서의 줄이 보이도록, 그 문서가 든 HTML 폴더만 펼친 채로 시작한다
+      merge: (persisted, current) => {
+        const saved = persisted as Partial<ViewerState> | undefined;
+        const selected = saved?.selectedDocument;
+
+        return {
+          ...current,
+          ...saved,
+          expandedHtmlFolders: selected ? [htmlFolderKey(selected.folderId, selected.path)] : [],
+        };
+      },
     },
   ),
 );
