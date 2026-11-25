@@ -1,4 +1,4 @@
-# 디자인 시스템 (v1.0.0)
+# 디자인 시스템
 
 화면이 들어가는 모든 작업은 시작하기 전에 `custom-design-system` Skill 을 먼저 읽는다. 코드뿐 아니라 목업 · 와이어프레임 · 시안 · 프로토타입, 기획 · 분석 문서 안의 화면 그림도 해당한다.
 Skill 은 jae0-fe 플러그인에 있다(`jae0-fe:custom-design-system`). 저장소 `.claude/skills/` 에는 두지 않는다.
